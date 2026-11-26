@@ -1,4 +1,4 @@
-import { TeacherAssignmentRecord } from './teacherAssignmentsRekap';
+import { TeacherAssignmentRecord } from './teacherAssignmentsRekap.js';
 
 export type TeachingScheduleRecord = TeacherAssignmentRecord;
 

@@ -1,4 +1,4 @@
-import { Subject } from '../types';
+import { Subject } from '../types.js';
 
 export interface CurriculumDefinition {
   key: string;

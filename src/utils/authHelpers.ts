@@ -1,5 +1,5 @@
-import { getSubjectsForClass } from '../data/curriculumSubjects';
-import { AuthUser, ClassItem, JenjangUnit, UserRole, SchoolType } from '../types';
+import { getSubjectsForClass } from '../data/curriculumSubjects.js';
+import { AuthUser, ClassItem, JenjangUnit, UserRole, SchoolType } from '../types.js';
 import {
   getTeacherProfiles,
   TeacherProfile,
@@ -7,8 +7,8 @@ import {
   normalizeClassToIds,
   isTeacherNameMatch,
   ALL_TEACHER_ASSIGNMENTS,
-} from '../data/teacherSubjectsDatabase';
-import { DAFTAR_WALI_KELAS, WaliKelasEntry } from '../data/waliKelasDatabase';
+} from '../data/teacherSubjectsDatabase.js';
+import { DAFTAR_WALI_KELAS, WaliKelasEntry } from '../data/waliKelasDatabase.js';
 
 /**
  * Get teachers filtered by unit/jenjang

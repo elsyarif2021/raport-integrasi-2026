@@ -1,4 +1,4 @@
-import { TEACHER_ASSIGNMENTS_SMA_REKAP } from './teacherAssignmentsSMARekap';
+import { TEACHER_ASSIGNMENTS_SMA_REKAP } from './teacherAssignmentsSMARekap.js';
 
 export interface TeacherAssignmentRecord {
   no: number;

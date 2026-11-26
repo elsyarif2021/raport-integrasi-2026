@@ -1,8 +1,8 @@
 import { createHash, randomBytes } from 'node:crypto';
-import { classes, permissions, type AccountIdentity } from '../server/access';
-import { database } from '../server/db';
-import { verifyPassword } from '../server/password';
-import type { StudentRecord } from '../src/types';
+import { classes, permissions, type AccountIdentity } from '../server/access.js';
+import { database } from '../server/db.js';
+import { verifyPassword } from '../server/password.js';
+import type { StudentRecord } from '../src/types.js';
 
 const sessionSeconds = 8 * 60 * 60;
 const secure = process.env.VERCEL === '1' || process.env.NODE_ENV === 'production';

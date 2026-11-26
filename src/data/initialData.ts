@@ -1,4 +1,4 @@
-import { Subject, SchoolConfig, ClassItem } from '../types';
+import { Subject, SchoolConfig, ClassItem } from '../types.js';
 
 export const INITIAL_CLASSES: ClassItem[] = [
   // Kelas 1 SMP

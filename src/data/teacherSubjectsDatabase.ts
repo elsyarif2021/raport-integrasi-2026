@@ -1,6 +1,6 @@
-import { MASTER_TEACHING_SCHEDULE } from './masterTeachingSchedule';
-import { TEACHER_ASSIGNMENTS_REKAP, TeacherAssignmentRecord } from './teacherAssignmentsRekap';
-import { TEACHER_ASSIGNMENTS_SMA_REKAP } from './teacherAssignmentsSMARekap';
+import { MASTER_TEACHING_SCHEDULE } from './masterTeachingSchedule.js';
+import { TEACHER_ASSIGNMENTS_REKAP, TeacherAssignmentRecord } from './teacherAssignmentsRekap.js';
+import { TEACHER_ASSIGNMENTS_SMA_REKAP } from './teacherAssignmentsSMARekap.js';
 
 export { MASTER_TEACHING_SCHEDULE };
 export const ALL_TEACHER_ASSIGNMENTS: TeacherAssignmentRecord[] = MASTER_TEACHING_SCHEDULE;

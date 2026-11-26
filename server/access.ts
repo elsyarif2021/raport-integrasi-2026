@@ -1,9 +1,9 @@
-import { INITIAL_CLASSES } from '../src/data/initialData';
-import { getSubjectsForClass } from '../src/data/curriculumSubjects';
-import { findTeachersForSubjectAndClass, normalizeTeacherName } from '../src/data/teacherSubjectsDatabase';
-import { DAFTAR_WALI_KELAS } from '../src/data/waliKelasDatabase';
-import { getJenjangForClass } from '../src/utils/authHelpers';
-import type { AuthUser, JenjangUnit, UserRole } from '../src/types';
+import { INITIAL_CLASSES } from '../src/data/initialData.js';
+import { getSubjectsForClass } from '../src/data/curriculumSubjects.js';
+import { findTeachersForSubjectAndClass, normalizeTeacherName } from '../src/data/teacherSubjectsDatabase.js';
+import { DAFTAR_WALI_KELAS } from '../src/data/waliKelasDatabase.js';
+import { getJenjangForClass } from '../src/utils/authHelpers.js';
+import type { AuthUser, JenjangUnit, UserRole } from '../src/types.js';
 
 export interface AccountIdentity {
   name: string;
