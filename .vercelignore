@@ -1,0 +1,5 @@
+.env
+.env.*
+*.private.json
+**/*.private.json
+private/

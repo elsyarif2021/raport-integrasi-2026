@@ -1,0 +1,45 @@
+{
+  "name": "raport-integrasi-2026",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "npx vercel dev",
+    "build": "vite build",
+    "clean": "rm -rf dist server.js",
+    "lint": "tsc --noEmit",
+    "account": "tsx scripts/manage.ts account",
+    "db:setup": "tsx scripts/manage.ts setup",
+    "db:import": "tsx scripts/manage.ts import",
+    "dev:ui": "vite --host 127.0.0.1 --port 3000 --strictPort",
+    "account:revoke": "tsx scripts/manage.ts revoke",
+    "db:extract": "tsx scripts/extract-legacy.ts"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "pg": "^8.23.1",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "recharts": "^3.10.1",
+    "vite": "^8.3.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "autoprefixer": "^10.4.21",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}
