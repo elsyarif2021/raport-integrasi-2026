@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { CalculatedStudent, ClassItem, SchoolType } from '../types';
-import { Search, Users, Printer, Download, PenTool, FileText, Plus, CheckCircle2, GraduationCap, FileSpreadsheet } from 'lucide-react';
+import { Search, Users, Printer, Download, PenTool, FileText, Plus, CheckCircle2, GraduationCap, FileSpreadsheet, Upload } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 interface DataMasterViewProps {
@@ -9,6 +9,7 @@ interface DataMasterViewProps {
   selectedClassId: string;
   onSelectClassId: (classId: string) => void;
   onAddStudent: () => void;
+  onImportZip?: (file: File) => Promise<{ imported: number; skipped: number }>;
   onEditStudent: (student: CalculatedStudent) => void;
   onDeleteStudent: (studentId: string) => void;
   onNavigateToGrading: (classId: string) => void;
@@ -22,12 +23,35 @@ export const DataMasterView: React.FC<DataMasterViewProps> = ({
   selectedClassId,
   onSelectClassId,
   onAddStudent,
+  onImportZip,
   onEditStudent,
   onDeleteStudent,
   onNavigateToGrading,
   onNavigateToRaport,
   schoolType = 'mukim',
 }) => {
+  const zipInput = useRef<HTMLInputElement>(null);
+  const [importingZip, setImportingZip] = useState(false);
+  const [zipMessage, setZipMessage] = useState<{ text: string; error?: boolean } | null>(null);
+
+  async function handleZip(file: File) {
+    if (!onImportZip) return;
+    if (!file.name.toLowerCase().endsWith('.zip') || file.size > 3 * 1024 * 1024) {
+      setZipMessage({ text: 'Pilih raport-pondok.zip asli dengan ukuran maksimal 3 MB.', error: true });
+      return;
+    }
+    setImportingZip(true);
+    setZipMessage(null);
+    try {
+      const { imported, skipped } = await onImportZip(file);
+      setZipMessage({ text: `${imported} santri diimpor. ${skipped} data yang sudah ada dilewati.` });
+    } catch (error) {
+      setZipMessage({ text: error instanceof Error ? error.message : 'Impor ZIP gagal.', error: true });
+    } finally {
+      setImportingZip(false);
+    }
+  }
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLevel, setSelectedLevel] = useState<string>('all');
   const [filterClass, setFilterClass] = useState<string>('all');
@@ -305,6 +329,30 @@ export const DataMasterView: React.FC<DataMasterViewProps> = ({
               <Printer size={14} />
               <span>Cetak Daftar</span>
             </button>
+            {onImportZip && (
+              <>
+                <input
+                  ref={zipInput}
+                  type="file"
+                  accept=".zip"
+                  hidden
+                  onChange={(event) => {
+                    const file = event.currentTarget.files?.[0];
+                    event.currentTarget.value = '';
+                    if (file) void handleZip(file);
+                  }}
+                />
+                <button
+                  type="button"
+                  disabled={importingZip}
+                  onClick={() => zipInput.current?.click()}
+                  className="flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-bold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60"
+                >
+                  <Upload size={15} />
+                  {importingZip ? 'Mengimpor santri…' : 'Impor ZIP Santri'}
+                </button>
+              </>
+            )}
             <button
               type="button"
               onClick={onAddStudent}
@@ -315,6 +363,12 @@ export const DataMasterView: React.FC<DataMasterViewProps> = ({
             </button>
           </div>
         </div>
+
+        {zipMessage && (
+          <p role={zipMessage.error ? 'alert' : 'status'} className={`mt-3 text-sm ${zipMessage.error ? 'text-rose-700' : 'text-emerald-800'}`}>
+            {zipMessage.text}
+          </p>
+        )}
 
         {/* Level Tabs */}
         <div className="flex items-center gap-2 mt-6 pt-5 border-t border-stone-100 overflow-x-auto">

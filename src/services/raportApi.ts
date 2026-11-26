@@ -32,3 +32,14 @@ export async function getStudents() {
   return (await request<{ students: StudentRecord[] }>('students')).students;
 }
 export const saveChanges = (changes: StudentChange[]) => request('save', { changes });
+
+export async function importLegacyZip(file: File): Promise<{ imported: number; skipped: number }> {
+  const response = await fetch('/api/raport?action=import-zip', {
+    method: 'POST', cache: 'no-store',
+    headers: { 'Content-Type': 'application/zip' },
+    body: file,
+  });
+  const result = await response.json().catch(() => null);
+  if (!response.ok || !result) throw new Error(result?.error || 'Impor ZIP gagal.');
+  return result;
+}

@@ -1,3 +1,4 @@
+import { readLegacyZip } from '../server/legacyImport.js';
 import { createHash, randomBytes } from 'node:crypto';
 import { classes, permissions, type AccountIdentity } from '../server/access.js';
 import { database } from '../server/db.js';
@@ -181,8 +182,8 @@ async function handler(request: Request) {
     const action = url.searchParams.get('action');
     const token = getToken(request);
     let body: Record<string, unknown> = {};
-    if (request.method === 'POST') {
-      if (request.headers.get('origin') !== url.origin) forbidden();
+    if (request.method === 'POST' && request.headers.get('origin') !== url.origin) forbidden();
+    if (request.method === 'POST' && action !== 'import-zip') {
       if (request.headers.get('content-type')?.split(';')[0] !== 'application/json') invalid();
       const payload = await request.text();
       if (payload.length > 900000) throw new RequestError(413, 'Perubahan terlalu besar.');
@@ -205,6 +206,33 @@ async function handler(request: Request) {
       return response({ user: account ? permissions(account).user : null });
     }
     if (!account) throw new RequestError(401, 'Sesi berakhir. Silakan masuk kembali.');
+    if (request.method === 'POST' && action === 'import-zip') {
+      if (account.role !== 'admin') forbidden();
+      if (request.headers.get('content-type') !== 'application/zip') {
+        throw new RequestError(415, 'Pilih berkas ZIP asli Raport Pondok.');
+      }
+      const maxBytes = 3 * 1024 * 1024;
+      if (Number(request.headers.get('content-length')) > maxBytes) {
+        throw new RequestError(413, 'Ukuran ZIP melebihi 3 MB.');
+      }
+      const bytes = new Uint8Array(await request.arrayBuffer());
+      if (bytes.length > maxBytes) throw new RequestError(413, 'Ukuran ZIP melebihi 3 MB.');
+      let records: StudentRecord[];
+      try {
+        records = readLegacyZip(bytes);
+      } catch {
+        throw new RequestError(400, 'ZIP tidak cocok. Pilih raport-pondok.zip asli yang berisi data santri.');
+      }
+      if (records.some(({ classId }) => !classes.has(classId))) {
+        throw new RequestError(400, 'Ada kelas santri yang belum terdaftar.');
+      }
+      const result = await database().query(
+        `INSERT INTO raport_students (id, record)
+         SELECT item->>'id', item FROM jsonb_array_elements($1::jsonb) AS item
+         ON CONFLICT (id) DO NOTHING`, [JSON.stringify(records)],
+      );
+      return response({ imported: result.rowCount, skipped: records.length - (result.rowCount ?? 0) });
+    }
     if (request.method === 'GET' && action === 'students') {
       const access = permissions(account);
       const result = await database().query<{ record: StudentRecord }>(

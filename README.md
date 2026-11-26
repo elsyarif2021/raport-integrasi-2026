@@ -37,6 +37,8 @@ Aplikasi Raport Pondok Modern Al-Ghozali. Antarmuka React dan Vite mempertahanka
 
 ## Penggunaan
 
+Untuk mengimpor arsip lama dari browser, masuk sebagai admin dan pilih **Data Master → Impor ZIP Santri**. Pilih `raport-pondok.zip` asli dengan ukuran maksimal 3 MB. Server memeriksa arsip terhadap sumber yang sudah diaudit dan hanya menambahkan ID yang belum ada.
+
 - **Guru** menerima daftar santri dari kelas yang diajar dan nilai mata pelajaran penugasannya.
 - **Wali kelas** menerima data lengkap kelas binaannya dan dapat mengisi nilai serta sikap di kelas tersebut. Akses di kelas lain mengikuti penugasan mengajar.
 - **Administrator** mengelola daftar santri, termasuk menambah, memindahkan, dan menghapus entri.

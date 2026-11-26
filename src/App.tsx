@@ -1,4 +1,4 @@
-import { getSession, getStudents, logout, saveChanges, type StudentChange } from './services/raportApi';
+import { getSession, getStudents, logout, saveChanges, importLegacyZip, type StudentChange } from './services/raportApi';
 /**
  * @license
  * SPDX-License-Identifier: Apache-2.0
@@ -1277,6 +1277,12 @@ export default function App() {
             classes={filteredClassesForUser}
             selectedClassId={selectedClassId}
             onSelectClassId={setSelectedClassId}
+            onImportZip={isAdmin ? async (file) => {
+              await flushChanges();
+              const result = await importLegacyZip(file);
+              await getStudents().then(setStudents).catch((error: Error) => setAccessMessage(error.message));
+              return result;
+            } : undefined}
             onAddStudent={() => {
               setEditingStudent(null);
               setIsStudentModalOpen(true);
