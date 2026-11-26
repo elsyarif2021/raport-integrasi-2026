@@ -29,7 +29,7 @@ Aplikasi Raport Pondok Modern Al-Ghozali. Antarmuka React dan Vite mempertahanka
 ## Host di Vercel
 
 1. Impor repositori ini ke Vercel dengan preset **Vite**. Gunakan Node.js 24. `vercel.json` menetapkan perintah build dan direktori `dist`.
-2. Masukkan `DATABASE_URL` ke **Settings → Environment Variables**, bertipe sensitif untuk Production. Gunakan koneksi terpisah bila menyiapkan Preview. Jangan memakai awalan `VITE_` pada kredensial apa pun.
+2. Jika integrasi Neon sudah menyediakan `RAPORT_INTEGRASI_DATABASE_URL` untuk Production, aplikasi membacanya otomatis. Untuk koneksi manual, masukkan `DATABASE_URL` ke **Settings → Environment Variables** sebagai variabel sensitif untuk Production. Gunakan koneksi terpisah bila menyiapkan Preview. Jangan memakai awalan `VITE_` pada kredensial apa pun.
 3. Deploy, lalu uji akun admin, guru, dan wali kelas dengan kelas berbeda. Pastikan guru bisa menyimpan nilai mapelnya dan sesi keluar menutup akses data.
 4. Jika versi sebelumnya sudah tayang, hapus akses ke deployment yang memuat data lama dan nonaktifkan Google Apps Script publik sebelumnya bila masih aktif. Ganti kredensial lama yang pernah dipakai.
 

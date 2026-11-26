@@ -226,7 +226,9 @@ async function handler(request: Request) {
     return response({ error: 'Operasi tidak tersedia.' }, 404);
   } catch (error) {
     if (error instanceof RequestError) return response({ error: error.message }, error.status);
-    console.error('Raport request failed', error instanceof Error ? error.name : 'UnknownError');
+    const errorCode = error instanceof Error && 'code' in error && typeof error.code === 'string'
+      && /^[A-Z0-9_]{3,40}$/.test(error.code) ? error.code : undefined;
+    console.error('Raport request failed', errorCode ?? (error instanceof Error ? error.name : 'UnknownError'));
     return response({ error: 'Layanan rapor gagal. Hubungi administrator sekolah.' }, 500);
   }
 }
