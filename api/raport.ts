@@ -31,7 +31,10 @@ export function createRaportBridge({key,fetcher=fetch}:{key:()=>string|undefined
       const upstream=await fetcher(target,{method:request.method,headers,body,redirect:'manual',signal:AbortSignal.timeout(25000)});
       if(!upstream.headers.get('content-type')?.includes('application/json'))return json({error:'Layanan pusat belum dapat dihubungi. Coba kembali.'},502);
       const responseHeaders=new Headers({'Content-Type':'application/json','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});
-      const responseCookies=typeof upstream.headers.getSetCookie==='function'?upstream.headers.getSetCookie():[upstream.headers.get('set-cookie')??''];
+      const cookieHeaders = upstream.headers as Headers & { getSetCookie?: () => string[] };
+      const responseCookies = typeof cookieHeaders.getSetCookie === 'function'
+        ? cookieHeaders.getSetCookie()
+        : (cookieHeaders.get('set-cookie') ?? '').split(/,(?=\s*[^\s;,=]+\s*=)/).map(value => value.trim());
       for(const value of responseCookies)if(/^(raport_pin_session|__Host-raport_google_session)=/.test(value))responseHeaders.append('Set-Cookie',value.replace(/;\s*Domain=[^;]+/ig,''));
       return new Response(upstream.body,{status:upstream.status,headers:responseHeaders});
     }catch{return json({error:'Layanan pusat belum dapat dihubungi. Coba kembali.'},502);}

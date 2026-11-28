@@ -61,3 +61,29 @@ test('bridge health verifies the connection signature without exposing account d
  const bridge=createRaportBridge({key:()=>key,fetcher:async(input,init)=>{const incoming=new Request(input,init);assert.equal(new URL(incoming.url).pathname,'/api/bridge-health');return Response.json({ok:await verifiedProxyRequest(incoming,key),protocol:1});}});
  const response=await bridge(request('bridge-status'));assert.equal(response.status,200);assert.deepEqual(await response.json(),{ok:true,protocol:1});
 });
+
+test('bridge preserves multiple session cookies and drops unrelated cookies',async()=>{
+ const headers=new Headers({'Content-Type':'application/json'});
+ headers.append('Set-Cookie','raport_pin_session=; Path=/; HttpOnly; Secure; Max-Age=0');
+ headers.append('Set-Cookie','__Host-raport_google_session='+'a'.repeat(64)+'; Path=/; Secure; HttpOnly; SameSite=Lax');
+ headers.append('Set-Cookie','unrelated=ignore; Path=/');
+ const bridge=createRaportBridge({key:()=>key,fetcher:async()=>new Response('{}',{headers})});
+ const response=await bridge(request('session'));
+ const cookies=response.headers.getSetCookie();
+ assert.equal(cookies.length,2);
+ assert.match(cookies[0],/^raport_pin_session=;/);
+ assert.match(cookies[1],/^__Host-raport_google_session=a{64};/);
+});
+test('bridge cookie compatibility fallback separates cookies without splitting Expires dates',async()=>{
+ const headers=new Headers({'Content-Type':'application/json'});
+ headers.append('Set-Cookie','raport_pin_session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT');
+ headers.append('Set-Cookie','__Host-raport_google_session='+'a'.repeat(64)+'; Path=/; Secure; HttpOnly');
+ const upstream=new Response('{}',{headers});
+ Object.defineProperty(upstream.headers,'getSetCookie',{value:undefined});
+ const bridge=createRaportBridge({key:()=>key,fetcher:async()=>upstream});
+ const response=await bridge(request('session'));
+ const cookies=response.headers.getSetCookie();
+ assert.equal(cookies.length,2);
+ assert.match(cookies[0],/Expires=Thu, 01 Jan 1970 00:00:00 GMT/);
+ assert.match(cookies[1],/^__Host-raport_google_session=a{64};/);
+});
