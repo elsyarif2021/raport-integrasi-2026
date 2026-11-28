@@ -17,12 +17,14 @@ Pendaftaran Google hanya menerima email pemilik yang sudah ditetapkan, `lionxmum
 
    `https://raport-integrasi-2627.vercel.app/auth/google/callback`
 
-3. Simpan `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` di environment **Production** proyek Vercel `raport-integrasi-2627`. Pertahankan `RAPORT_PROXY_KEY` yang sudah terpasang. Jangan memakai awalan `VITE_` atau menaruh secret dalam source/percakapan.
+   `https://raport-integrasi-2026.vercel.app/auth/google/callback`
+
+3. Simpan `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` di environment **Production** proyek Vercel `raport-integrasi-2627` dan `raport-integrasi-2026` jika keduanya akan dipakai. Pastikan masing-masing proyek memiliki `RAPORT_PROXY_KEY` yang sama dengan backend Sites; jangan mengganti atau mengungkap nilainya. Jangan memakai awalan `VITE_` atau menaruh secret dalam source/percakapan.
 4. Redeploy Vercel, lalu buka tab **Super admin**, pilih **Daftar super admin**, dan selesaikan verifikasi Google. Setelah berhasil, pilih **Masuk dengan Google**.
 
-Kode tidak memasang kredensial Google contoh. Selama dua environment Google belum diisi, `GET /api/google?action=status` mengembalikan `configured:false` dan tombol Google dinonaktifkan dengan pesan pengaturan belum selesai. Alur Google memerlukan pengujian langsung oleh pemilik setelah konfigurasi; pengujian otomatis memakai identitas dan kunci sintetis.
+Kode tidak memasang kredensial Google contoh. Selama `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, atau `RAPORT_PROXY_KEY` belum diisi secara valid, `GET /api/google?action=status` mengembalikan `configured:false` dan tombol Google dinonaktifkan dengan pesan pengaturan belum selesai. Alur Google memerlukan pengujian langsung oleh pemilik setelah konfigurasi; pengujian otomatis memakai identitas dan kunci sintetis.
 
-Origin dan callback Google dipatok ke alamat produksi di `server/googleOAuth.ts`. Jika domain produksi diganti, perbarui keduanya serta Authorized redirect URI di Google. Preview deployment tidak dapat dipakai sebagai callback alternatif.
+Origin dan callback Google hanya menerima dua domain produksi yang disebutkan di atas (allowlist di `server/googleOAuth.ts`). Jika domain produksi diganti, perbarui allowlist, pengujian, serta Authorized redirect URI di Google. Preview deployment tidak dapat dipakai sebagai callback alternatif.
 
 Tidak ada impor ulang atau penghapusan database Neon lama. Skrip dan backend Neon terdahulu masih berada dalam riwayat Git; endpoint Vercel aktif sekarang meneruskan permintaan ke Sites. Folder `sites/` menyimpan salinan source Sites.
 

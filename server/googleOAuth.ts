@@ -3,7 +3,10 @@ import { GOOGLE_OWNER_EMAIL } from './googleAdmin.js';
 import { validProxyKey } from './proxyClient.js';
 
 export const APP_ORIGIN = 'https://raport-integrasi-2627.vercel.app';
-export const GOOGLE_CALLBACK = APP_ORIGIN + '/auth/google/callback';
+export const APP_ORIGINS = [APP_ORIGIN, 'https://raport-integrasi-2026.vercel.app'] as const;
+export const isGoogleAppOrigin = (origin: string): boolean => (APP_ORIGINS as readonly string[]).includes(origin);
+export const googleCallbackUrl = (origin: string) => origin + '/auth/google/callback';
+export const GOOGLE_CALLBACK = googleCallbackUrl(APP_ORIGIN);
 export const FLOW_COOKIE = '__Host-raport_google_flow';
 export type GoogleIntent = 'register' | 'login';
 export interface GoogleConfig { clientId: string; clientSecret: string; proxyKey: string }
@@ -25,24 +28,26 @@ export function cookieValue(request: Request, name: string) {
   return matches.length === 1 ? matches[0].slice(name.length + 1) : null;
 }
 export const flowCookie = (value: string, maxAge = 600) => `${FLOW_COOKIE}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
-export async function startGoogle(config: GoogleConfig, intent: GoogleIntent) {
+export async function startGoogle(config: GoogleConfig, intent: GoogleIntent, origin = APP_ORIGIN) {
+  if (!isGoogleAppOrigin(origin)) throw new Error('Unsupported application origin');
   const flow: GoogleFlow = { state: random(), nonce: random(), verifier: random(), intent };
   const sealed = await new EncryptJWT({ ...flow }).setProtectedHeader({ alg: 'dir', enc: 'A256GCM' })
-    .setIssuer('raport-google-flow').setAudience(APP_ORIGIN).setIssuedAt().setExpirationTime('10m')
+    .setIssuer('raport-google-flow').setAudience(origin).setIssuedAt().setExpirationTime('10m')
     .encrypt(await flowKey(config.proxyKey));
   const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', encoder.encode(flow.verifier)));
   const challenge = btoa(String.fromCharCode(...hash)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   const target = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-  target.search = new URLSearchParams({ client_id: config.clientId, redirect_uri: GOOGLE_CALLBACK,
+  target.search = new URLSearchParams({ client_id: config.clientId, redirect_uri: googleCallbackUrl(origin),
     response_type: 'code', scope: 'openid email profile', state: flow.state, nonce: flow.nonce,
     code_challenge: challenge, code_challenge_method: 'S256', prompt: 'select_account' }).toString();
   return { url: target.href, cookie: flowCookie(sealed) };
 }
-export async function readGoogleFlow(request: Request, config: GoogleConfig): Promise<GoogleFlow> {
+export async function readGoogleFlow(request: Request, config: GoogleConfig, origin = APP_ORIGIN): Promise<GoogleFlow> {
+  if (!isGoogleAppOrigin(origin) || new URL(request.url).origin !== origin) throw new Error('Invalid callback origin');
   const sealed = cookieValue(request, FLOW_COOKIE);
   if (!sealed || sealed.length > 4096) throw new Error('Invalid flow');
   const { payload } = await jwtDecrypt(sealed, await flowKey(config.proxyKey), {
-    issuer: 'raport-google-flow', audience: APP_ORIGIN, keyManagementAlgorithms: ['dir'], contentEncryptionAlgorithms: ['A256GCM'], maxTokenAge: '10m',
+    issuer: 'raport-google-flow', audience: origin, keyManagementAlgorithms: ['dir'], contentEncryptionAlgorithms: ['A256GCM'], maxTokenAge: '10m',
   });
   if (![payload.state, payload.nonce, payload.verifier].every(value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value))
     || (payload.intent !== 'register' && payload.intent !== 'login')) throw new Error('Invalid flow');
@@ -61,11 +66,11 @@ export async function verifyGoogleIdentity(token: string, clientId: string, nonc
   return { sub: payload.sub, email: GOOGLE_OWNER_EMAIL, emailVerified: true,
     name: typeof payload.name === 'string' && payload.name.trim() ? payload.name.trim().slice(0, 200) : 'Super Admin' };
 }
-export async function exchangeGoogleCode(code: string, flow: GoogleFlow, config: GoogleConfig, fetcher: typeof fetch = fetch, keys?: JWTVerifyGetKey) {
+export async function exchangeGoogleCode(code: string, flow: GoogleFlow, config: GoogleConfig, fetcher: typeof fetch = fetch, keys?: JWTVerifyGetKey, origin = APP_ORIGIN) {
   const response = await fetcher('https://oauth2.googleapis.com/token', { method: 'POST', redirect: 'error',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, signal: AbortSignal.timeout(12000),
     body: new URLSearchParams({ code, client_id: config.clientId, client_secret: config.clientSecret,
-      redirect_uri: GOOGLE_CALLBACK, grant_type: 'authorization_code', code_verifier: flow.verifier }) });
+      redirect_uri: googleCallbackUrl(origin), grant_type: 'authorization_code', code_verifier: flow.verifier }) });
   if (!response.ok) throw new Error('Google authorization failed');
   const value = await response.json() as { id_token?: unknown };
   if (typeof value.id_token !== 'string' || value.id_token.length > 16000) throw new Error('Invalid Google response');

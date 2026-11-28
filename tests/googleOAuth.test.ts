@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { SignJWT, createLocalJWKSet, exportJWK, generateKeyPair, EncryptJWT } from 'jose';
-import { APP_ORIGIN, GOOGLE_CALLBACK, FLOW_COOKIE, configuredGoogle, readGoogleFlow, startGoogle, verifyGoogleIdentity } from '../server/googleOAuth';
+import { APP_ORIGIN, GOOGLE_CALLBACK, FLOW_COOKIE, isGoogleAppOrigin, configuredGoogle, readGoogleFlow, startGoogle, verifyGoogleIdentity } from '../server/googleOAuth';
 import { createGoogleHandler } from '../api/google';
 import { verifyGoogleRpc } from '../server/googleRpc';
 
@@ -95,4 +95,20 @@ test('Unconfigured, cross-site, cancelled and forged callbacks cannot create a s
   const first = await startGoogle(config, 'login'), auth = new URL(first.url);
   assert.equal((await handler(callback(auth, first.cookie, { error: 'access_denied' }))).headers.get('location'), APP_ORIGIN + '/?google=cancelled');
   assert.equal(calls, 0);
+});
+
+test('Google sign-in supports both fixed production hosts and rejects cross-domain OAuth flow cookies', async () => {
+  const alternative = 'https://raport-integrasi-2026.vercel.app';
+  assert.equal(isGoogleAppOrigin(alternative), true);
+  assert.equal(isGoogleAppOrigin('https://raport-integrasi-2026.vercel.app.evil.test'), false);
+  const start = await startGoogle(config, 'login', alternative), auth = new URL(start.url);
+  assert.equal(auth.searchParams.get('redirect_uri'), alternative + '/auth/google/callback');
+  const callbackUrl = new URL(alternative + '/auth/google/callback');
+  callbackUrl.search = new URLSearchParams({ state: auth.searchParams.get('state')!, code: 'synthetic-code' }).toString();
+  const request = new Request(callbackUrl, { headers: { Cookie: start.cookie.split(';')[0] } });
+  assert.equal((await readGoogleFlow(request, config, alternative)).intent, 'login');
+  await assert.rejects(readGoogleFlow(request, config, APP_ORIGIN));
+  const handler = createGoogleHandler({ configuration: () => config });
+  assert.deepEqual(await (await handler(new Request(alternative + '/api/google?action=status'))).json(), { configured: true });
+  assert.deepEqual(await (await handler(new Request('https://evil.test/api/google?action=status'))).json(), { configured: false });
 });
