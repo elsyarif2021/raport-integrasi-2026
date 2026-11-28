@@ -22,8 +22,8 @@ export function createRaportBridge({key,fetcher=fetch}:{key:()=>string|undefined
     if(action!=='bridge-status')target.searchParams.set('action',action);
     const headers=new Headers({'Origin':backendOrigin,'Sec-Fetch-Site':'same-origin'});
     if(request.method==='POST')headers.set('Content-Type',request.headers.get('content-type')!);
-    const cookie=request.headers.get('cookie')?.split(';').map(part=>part.trim()).find(part=>/^raport_pin_session=[a-f0-9]{64}$/.test(part));
-    if(cookie)headers.set('Cookie',cookie);
+    const cookies=request.headers.get('cookie')?.split(';').map(part=>part.trim()).filter(part=>/^(raport_pin_session|__Host-raport_google_session)=[a-f0-9]{64}$/.test(part));
+    if(cookies?.length)headers.set('Cookie',cookies.join('; '));
     const timestamp=String(Date.now()),ip=proxyClientIp(request.headers.get('x-vercel-forwarded-for')??request.headers.get('x-real-ip'));
     headers.set('x-raport-proxy-time',timestamp);headers.set('x-raport-proxy-ip',ip);
     headers.set('x-raport-proxy-signature',await signProxyRequest(request.method,target.href,timestamp,ip,secret));
@@ -31,8 +31,8 @@ export function createRaportBridge({key,fetcher=fetch}:{key:()=>string|undefined
       const upstream=await fetcher(target,{method:request.method,headers,body,redirect:'manual',signal:AbortSignal.timeout(25000)});
       if(!upstream.headers.get('content-type')?.includes('application/json'))return json({error:'Layanan pusat belum dapat dihubungi. Coba kembali.'},502);
       const responseHeaders=new Headers({'Content-Type':'application/json','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});
-      const cookies=typeof upstream.headers.getSetCookie==='function'?upstream.headers.getSetCookie():[upstream.headers.get('set-cookie')??''];
-      for(const value of cookies)if(/^raport_pin_session=/.test(value))responseHeaders.append('Set-Cookie',value.replace(/;\s*Domain=[^;]+/ig,''));
+      const responseCookies=typeof upstream.headers.getSetCookie==='function'?upstream.headers.getSetCookie():[upstream.headers.get('set-cookie')??''];
+      for(const value of responseCookies)if(/^(raport_pin_session|__Host-raport_google_session)=/.test(value))responseHeaders.append('Set-Cookie',value.replace(/;\s*Domain=[^;]+/ig,''));
       return new Response(upstream.body,{status:upstream.status,headers:responseHeaders});
     }catch{return json({error:'Layanan pusat belum dapat dihubungi. Coba kembali.'},502);}
   };

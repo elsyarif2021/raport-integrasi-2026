@@ -34,7 +34,7 @@ export function AppShell({user,activeView,onSelectView,schoolType,onSelectSchool
   const activeLabel=features.find(item=>item.id===activeView)?.label || 'Raport Pondok';
   const units=availableUnits ?? user.availableUnits ?? ['SMP','SMA','TMMIA'];
   const programs:SchoolType[]=availableSchoolTypes ?? ['mukim','fullday'];
-  const roleLabel=user.role==='admin'?'Administrator':user.role==='wali_kelas'?'Wali kelas':'Guru';
+  const roleLabel=user.isSuperAdmin?'Super Admin':user.role==='admin'?'Administrator':user.role==='wali_kelas'?'Wali kelas':'Guru';
   useEffect(()=>{workspace.current?.scrollTo({top:0,left:0});},[activeView]);
   useEffect(()=>{const onKey=(event:KeyboardEvent)=>{if(event.key==='Escape')setMenuOpen(false);};window.addEventListener('keydown',onKey);return()=>window.removeEventListener('keydown',onKey);},[]);
   function navigate(view:WorkspaceView) {onSelectView(view);setMenuOpen(false);workspace.current?.scrollTo({top:0,left:0});}

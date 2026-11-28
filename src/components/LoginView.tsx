@@ -5,6 +5,7 @@ import { usesSharedBackend, ownerAccessUrl } from '../services/hosting';
 import { loginReturnPath } from '../utils/loginLink';
 import { SchoolLogo } from './SchoolLogo';
 import { ShieldCheck, BookOpen, GraduationCap, Loader2 } from 'lucide-react';
+import { GoogleAdminLogin } from './GoogleAdminLogin';
 
 interface LoginViewProps {
   onLoginSuccess: (user: AuthUser, unit: JenjangUnit) => void;
@@ -21,7 +22,11 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, personalLi
   const [pin,setPin]=useState('');
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState('');
+  const [googleResult]=useState(()=>new URLSearchParams(window.location.search).get('google'));
+  const [loginMode,setLoginMode]=useState<'pin'|'google'>(()=>usesSharedBackend&&new URLSearchParams(window.location.search).has('google')?'google':'pin');
   const usePin=Boolean(pinSlug)||!linkToken;
+  const showGoogleChoice=usesSharedBackend&&!personalLink&&!pinSlug&&!linkToken&&!inactiveLink;
+  useEffect(()=>{if(googleResult){const url=new URL(window.location.href);url.searchParams.delete('google');window.history.replaceState(null,'',url.pathname+url.search+url.hash);}},[googleResult]);
   useEffect(()=>{setName(personalLink?.name??'');setPin('');setError('');},[personalLink?.name,pinSlug]);
   async function submit(event:React.FormEvent) {
     event.preventDefault();setBusy(true);setError('');
@@ -37,10 +42,11 @@ export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, personalLi
       <SchoolLogo size={72} className="mx-auto mb-5" />
       <p className="text-sm font-semibold tracking-widest uppercase text-emerald-700">Pondok Modern Al-Ghozali</p>
       <h1 className="text-3xl font-bold text-slate-900 mt-3">{personalLink?'Selamat datang':'Raport Integrasi'}</h1>
-      {personalLink?<div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-xl font-bold text-emerald-950 break-words">{personalLink.name}</p><p className="mt-2 text-sm font-medium text-emerald-800">{roleLabel}{personalLink.role!=='admin'?' · Sesuai penugasan':''}</p></div>:<p className="text-base text-slate-600 leading-relaxed mt-4">Masuk menggunakan nama akun dan PIN Anda.</p>}
+      {personalLink?<div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-xl font-bold text-emerald-950 break-words">{personalLink.name}</p><p className="mt-2 text-sm font-medium text-emerald-800">{roleLabel}{personalLink.role!=='admin'?' · Sesuai penugasan':''}</p></div>:<p className="text-base text-slate-600 leading-relaxed mt-4">{showGoogleChoice?'Pilih akses sesuai peran Anda.':'Masuk menggunakan nama akun dan PIN Anda.'}</p>}
+      {showGoogleChoice&&<div aria-label="Pilihan akses" className="mt-6 grid grid-cols-2 gap-1 rounded-xl bg-stone-100 p-1">{([{id:'pin',label:'Guru & admin'},{id:'google',label:'Super admin'}] as const).map(mode=><button key={mode.id} type="button" aria-pressed={loginMode===mode.id} onClick={()=>{setLoginMode(mode.id);setError('');}} className={`rounded-lg px-3 py-2.5 text-sm font-semibold ${loginMode===mode.id?'bg-white text-emerald-900 shadow-sm':'text-stone-600 hover:text-emerald-900'}`}>{mode.label}</button>)}</div>}
       {noticeMessage&&<p role="status" className="mt-5 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-900">{noticeMessage}</p>}
       {(error||errorMessage)&&<p role="alert" className="mt-5 rounded-xl bg-rose-50 p-4 text-sm text-rose-800">{error||errorMessage}</p>}
-      {inactiveLink?<a href="/" target="_top" className="mt-6 inline-flex rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white">Buka halaman masuk umum</a>:usePin?<form onSubmit={submit} className="mt-6 space-y-4 text-left">
+      {showGoogleChoice&&loginMode==='google'?<GoogleAdminLogin result={googleResult}/>:inactiveLink?<a href="/" target="_top" className="mt-6 inline-flex rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white">Buka halaman masuk umum</a>:usePin?<form onSubmit={submit} className="mt-6 space-y-4 text-left">
         {!personalLink&&<label className="block text-sm font-semibold text-slate-700">Nama<input required autoComplete="username" value={name} maxLength={200} onChange={event=>setName(event.target.value)} placeholder="Nama yang ditetapkan admin" className="mt-1.5 block w-full rounded-xl border border-slate-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500"/></label>}
         <label className="block text-sm font-semibold text-slate-700">PIN<input required type="password" inputMode="numeric" autoComplete="current-password" pattern="[0-9]{6,12}" minLength={6} maxLength={12} value={pin} onChange={event=>setPin(event.target.value)} placeholder="Masukkan PIN" className="mt-1.5 block w-full rounded-xl border border-slate-300 px-4 py-3 text-base tracking-widest focus:outline-none focus:ring-2 focus:ring-emerald-500"/></label>
         <button disabled={busy} type="submit" className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-800 px-5 py-3.5 text-base font-semibold text-white hover:bg-emerald-900 disabled:opacity-60">{busy?<Loader2 size={20} className="animate-spin"/>:<ShieldCheck size={20}/>}Masuk</button>

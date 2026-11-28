@@ -3,10 +3,11 @@ import type { StudentRecord, UserRole } from '../src/types';
 import { readLegacyZip } from './legacyImport';
 import { createLoginToken, findLinkedAccount } from './loginLinks';
 import { PinAuthError, changeOwnPin, clearPinSession, listPinAccounts, loginWithPin, pinAccountForSlug, readPinSession, saveAutomaticPinAccount, validatePinIdentity, writeWithAdminLimit } from './pinAuth';
+import { revokeGoogleSession, type GoogleAdminIdentity } from './googleAdmin';
 import { createPinBulk, getPinBulkCandidates } from './pinBulk';
 
 export interface Environment { DB: D1Database; ASSETS: Fetcher; RAPORT_PIN_BULK_KEY?:string }
-type Member = AccountIdentity & { user_id: string; email: string; loginMethod?: 'pin' | 'chatgpt'; pinId?: string };
+type Member = AccountIdentity & { user_id: string; email: string; loginMethod?: 'pin' | 'chatgpt' | 'google'; pinId?: string; isSuperAdmin?:boolean };
 const OWNER_EMAIL = 'lionxmumtaz@gmail.com';
 const roles = new Set(['admin', 'guru', 'wali_kelas']);
 const attitudes = new Set(['', 'Sangat Baik', 'Baik', 'Cukup', 'Perlu Bimbingan']);
@@ -18,8 +19,10 @@ const object = (value: unknown): value is Record<string, any> => Boolean(value) 
 class RequestError extends Error { constructor(public status: number, message: string) { super(message); } }
 function invalid(): never { throw new RequestError(400, 'Data perubahan tidak valid.'); }
 function forbidden(): never { throw new RequestError(403, 'Akun ini tidak memiliki izin untuk perubahan tersebut.'); }
-function json(value: unknown, status = 200, cookie?: string) {
-  return Response.json(value, { status, headers: { 'Cache-Control': 'private, no-store', 'X-Content-Type-Options': 'nosniff', ...(cookie ? {'Set-Cookie':cookie} : {}) } });
+function json(value:unknown,status=200,cookie?:string|string[]) {
+  const headers=new Headers({'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'});
+  for(const item of cookie?(Array.isArray(cookie)?cookie:[cookie]):[])headers.append('Set-Cookie',item);
+  return Response.json(value,{status,headers});
 }
 
 async function memberFor(request: Request, db: D1Database): Promise<Member | null> {
@@ -36,10 +39,10 @@ async function memberFor(request: Request, db: D1Database): Promise<Member | nul
   return account ? {...account,loginMethod:'chatgpt'} : null;
 }
 
-async function accountFor(request: Request, db: D1Database): Promise<Member | null> {
+async function accountFor(request: Request, db: D1Database, googleAccount?:GoogleAdminIdentity|null): Promise<Member | null> {
   const pinAccount=await readPinSession(request,db);
   if(pinAccount)return {...pinAccount,user_id:'pin:'+pinAccount.id,email:'',pinId:pinAccount.id,loginMethod:'pin'};
-  return memberFor(request,db);
+  return googleAccount??memberFor(request,db);
 }
 
 export async function saveStudents(db: D1Database, account: AccountIdentity, input: unknown) {
@@ -118,7 +121,7 @@ export async function saveStudents(db: D1Database, account: AccountIdentity, inp
   }
 }
 
-export async function handleApi(request: Request, env: Environment) {
+export async function handleApi(request: Request, env: Environment, googleContext?:{account:GoogleAdminIdentity|null;token:string|null}) {
   try {
     const url = new URL(request.url);
     const action = url.searchParams.get('action');
@@ -134,7 +137,7 @@ export async function handleApi(request: Request, env: Environment) {
     }
     if (request.method === 'POST' && action === 'pin-login') {
       const result=await loginWithPin(request,env.DB,body);
-      return json({user:result.user},200,result.cookie);
+      return json({user:result.user},200,[result.cookie,...(googleContext?.token?[await revokeGoogleSession(env.DB,googleContext.token)]:[])]);
     }
     if(action==='pin-change') {
       if(request.method!=='POST')return json({error:'Metode tidak tersedia.'},405);
@@ -152,7 +155,7 @@ export async function handleApi(request: Request, env: Environment) {
     }
     if (request.method === 'POST' && action === 'logout') {
       const pin=await readPinSession(request,env.DB);
-      return json({ok:true,loginMethod:pin?'pin':'chatgpt'},200,await clearPinSession(request,env.DB));
+      return json({ok:true,loginMethod:pin?'pin':googleContext?.account?'google':'chatgpt'},200,[await clearPinSession(request,env.DB),...(googleContext?.token?[await revokeGoogleSession(env.DB,googleContext.token)]:[])]);
     }
     if (request.method === 'POST' && ['login-link-preview', 'login-link-session'].includes(action || '')) {
       const linked = await findLinkedAccount(env.DB, body.token);
@@ -165,8 +168,8 @@ export async function handleApi(request: Request, env: Environment) {
       if (!linkedMember || linkedMember.email !== linked.email || !['guru','wali_kelas'].includes(linkedMember.role)) forbidden();
       return json({ user: {...permissions(linkedMember).user,loginMethod:'chatgpt'} },200,await clearPinSession(request,env.DB));
     }
-    const account = await accountFor(request,env.DB);
-    if (request.method === 'GET' && action === 'session') return json({ user: account ? {...permissions(account).user,loginMethod:account.loginMethod} : null, authenticated: true });
+    const account = await accountFor(request,env.DB,googleContext?.account);
+    if (request.method === 'GET' && action === 'session') return json({ user: account ? {...permissions(account).user,loginMethod:account.loginMethod,...(account.isSuperAdmin?{isSuperAdmin:true,email:account.email}:{})} : null, authenticated: true });
     if (!account) throw new RequestError(403,'Akun ChatGPT Anda belum diberi peran. Hubungi administrator sekolah.');
     if(action==='pin-bulk-candidates'||action==='pin-bulk-create') {
       if(account.role!=='admin')forbidden();

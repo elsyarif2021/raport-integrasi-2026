@@ -30,6 +30,15 @@
   "functions": {
     "api/raport.ts": {
       "maxDuration": 30
+    },
+    "api/google.ts": {
+      "maxDuration": 30
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/auth/google/callback",
+      "destination": "/api/google?action=callback"
+    }
+  ]
 }

@@ -30,8 +30,8 @@ export async function getSession() {
 }
 export const logout = async (method?: AuthUser['loginMethod']) => {
   const returnTo = window.location.pathname + window.location.hash;
-  const result=await request<{loginMethod:'pin'|'chatgpt'}>('logout',{});
-  window.top!.location.href = (method ?? result.loginMethod)==='pin'
+  const result=await request<{loginMethod:AuthUser['loginMethod']}>('logout',{});
+  window.top!.location.href = ['pin','google'].includes(method ?? result.loginMethod ?? '')
     ? new URL(returnTo,window.location.origin).href
     : new URL('/signout-with-chatgpt?return_to=' + encodeURIComponent(returnTo), window.location.origin).href;
 };

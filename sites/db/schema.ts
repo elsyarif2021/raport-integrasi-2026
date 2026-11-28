@@ -40,3 +40,15 @@ export const students = sqliteTable('raport_students', {
 export const writeGuards = sqliteTable('raport_write_guards', {
   id: text('id').primaryKey(), valid: integer('valid').notNull(),
 }, () => [check('raport_write_conflict', sql`valid = 1`)]);
+
+export const googleAdmins = sqliteTable('raport_google_admins', {
+  googleSub: text('google_sub').primaryKey(), email: text('email').notNull().unique(),
+  name: text('name').notNull(), createdAt: integer('created_at').notNull(),
+});
+export const googleSessions = sqliteTable('raport_google_sessions', {
+  tokenHash: text('token_hash').primaryKey(), googleSub: text('google_sub').notNull().references(()=>googleAdmins.googleSub,{onDelete:'cascade'}),
+  expiresAt: integer('expires_at').notNull(),
+}, table=>[index('google_session_expiry').on(table.expiresAt)]);
+export const googleOperations = sqliteTable('raport_google_operations', {
+  id:text('id').primaryKey(), expiresAt:integer('expires_at').notNull(),
+});

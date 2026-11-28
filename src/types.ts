@@ -72,7 +72,9 @@ export interface PinBulkResult {
 export type JenjangUnit = 'SMP' | 'SMA' | 'TMMIA';
 
 export interface AuthUser {
-  loginMethod?: 'pin' | 'chatgpt';
+  loginMethod?: 'pin' | 'chatgpt' | 'google';
+  isSuperAdmin?: boolean;
+  email?: string;
   role: UserRole;
   name: string;
   unit?: JenjangUnit;
