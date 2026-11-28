@@ -64,6 +64,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
   const arabicFontFamily = designConfig?.arabicFontFamily ?? "'Traditional Arabic', 'Scheherazade New', 'Amiri', serif";
   const latinFontFamily = designConfig?.latinFontFamily ?? "'Times New Roman', Arial, sans-serif";
   const isTitleItalic = designConfig?.isTitleItalic ? 'italic' : 'normal';
+  const simple = designConfig?.frameDecoration !== 'ornate';
 
   // Adaptive font sizing for variable data (Student Name & Class)
   const dynamicNameFontSize = studentName.length > 24
@@ -80,7 +81,7 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
       <div className="flex items-center justify-between px-2 pt-1 pb-2">
         {/* Left Official Logo */}
         <div className="flex-shrink-0 flex items-center justify-center">
-          <SchoolLogo size={65} idPrefix="logo-header-left" />
+          <SchoolLogo size={simple ? 52 : 65} idPrefix="logo-header-left" />
         </div>
 
         {/* Center Calligraphic Header */}
@@ -92,6 +93,8 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
               fontFamily: arabicFontFamily,
               fontStyle: isTitleItalic,
               letterSpacing: 'normal',
+              width: '100%',
+              whiteSpace: 'nowrap',
             }}
           >
             كشف الدرجات
@@ -103,6 +106,8 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
               fontSize: `${subTitleFontSize}pt`,
               fontFamily: arabicFontFamily,
               letterSpacing: 'normal',
+              width: '100%',
+              whiteSpace: 'nowrap',
             }}
           >
             {!config.subTitleAr || config.subTitleAr.includes('لتقييم منتصف')
@@ -112,8 +117,8 @@ export const ReportHeader: React.FC<ReportHeaderProps> = ({
         </div>
 
         {/* Right Official Logo */}
-        <div className="flex-shrink-0 flex items-center justify-center">
-          <SchoolLogo size={65} idPrefix="logo-header-right" />
+        <div className="flex-shrink-0 flex items-center justify-center" aria-hidden={simple || undefined} style={simple ? {width:52} : undefined}>
+          {!simple && <SchoolLogo size={65} idPrefix="logo-header-right" />}
         </div>
       </div>
 

@@ -91,6 +91,16 @@ export const CertificateBorder: React.FC<CertificateBorderProps> = ({
   // Corner rosette dimensions (64px × 64px)
   const C = 64;
 
+  if (designConfig?.frameDecoration !== 'ornate') {
+    return (
+      <div className={`frame-container relative w-full h-full bg-white box-border ${className}`} data-frame-style="simple" style={{position:'relative',width:'100%',height:'100%',boxSizing:'border-box',backgroundColor:'#ffffff',overflow:'hidden'}}>
+        <div aria-hidden="true" style={{position:'absolute',inset:'20px',borderStyle:designConfig?.frameBorderStyle || 'solid',borderWidth:designConfig?.frameBorderWidth ?? 1,borderColor:designConfig?.frameBorderColor || '#174D3A',borderRadius:designConfig?.frameBorderRadius || 0,pointerEvents:'none',boxSizing:'border-box'}} />
+        <div className="relative w-full h-full flex flex-col justify-between" style={{boxSizing:'border-box',padding:`${32+paddingTop}px ${32+paddingRight}px ${32+paddingBottom}px ${32+paddingLeft}px`}}>{children}</div>
+        {isEditingMode && !isPrintOnly && onUpdateDesignConfig && designConfig && (['top','bottom','left','right'] as const).map(edge=><div key={edge} data-editing-control="true" className="no-print absolute z-40" title={`Geser batas ${edge}`} onMouseDown={event=>handleStartDrag(edge,event)} style={edge==='top'||edge==='bottom'?{[edge]:20,left:20,right:20,height:8,cursor:'ns-resize'}:{[edge]:20,top:20,bottom:20,width:8,cursor:'ew-resize'}} />)}
+      </div>
+    );
+  }
+
   return (
     <div 
       className={`frame-container relative w-full h-full bg-white text-stone-900 box-border group/frame ${className}`}

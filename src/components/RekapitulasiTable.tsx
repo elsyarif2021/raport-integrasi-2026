@@ -3,6 +3,7 @@ import { Subject, CalculatedStudent, SchoolConfig, ClassItem, AuthUser, SchoolTy
 import { getSubjectsForClass } from '../data/curriculumSubjects';
 import { getSubjectAbbreviation } from '../utils/indonesianNumbers';
 import { DAFTAR_WALI_KELAS } from '../data/waliKelasDatabase';
+import { getHomeroomClassIds, getWorkspaceClasses } from '../utils/workspaceAccess';
 import {
   Printer,
   Download,
@@ -99,10 +100,10 @@ export const RekapitulasiTable: React.FC<RekapitulasiTableProps> = ({
 
   const availableClasses = useMemo(() => {
     const source = allClasses && allClasses.length > 0 ? allClasses : classes;
-    return source.filter((c) =>
+    return getWorkspaceClasses(currentUser, 'rekap', source).filter((c) =>
       schoolType === 'fullday' ? c.schoolType === 'fullday' : c.schoolType !== 'fullday'
     );
-  }, [allClasses, classes, schoolType]);
+  }, [allClasses, classes, schoolType, currentUser]);
 
   const getWaliForClassItem = (cls: ClassItem): string => {
     if (cls.waliKelasName) return cls.waliKelasName;
@@ -113,25 +114,7 @@ export const RekapitulasiTable: React.FC<RekapitulasiTableProps> = ({
   };
 
   const isHomeroomClass = (cls: ClassItem) => {
-    if (!currentUser) return false;
-    if (currentUser.homeroomClassId && cls.id.toLowerCase() === currentUser.homeroomClassId.toLowerCase()) {
-      return true;
-    }
-    if (
-      currentUser.homeroomClassName &&
-      cls.nameLatin.toLowerCase().includes(currentUser.homeroomClassName.toLowerCase())
-    ) {
-      return true;
-    }
-    const waliName = getWaliForClassItem(cls);
-    if (currentUser.role === 'wali_kelas' && waliName) {
-      const cleanTeacherName = currentUser.name.toLowerCase().replace(/[^a-z]/g, '');
-      const cleanWaliName = waliName.toLowerCase().replace(/[^a-z]/g, '');
-      if (cleanTeacherName && cleanWaliName && (cleanWaliName.includes(cleanTeacherName) || cleanTeacherName.includes(cleanWaliName))) {
-        return true;
-      }
-    }
-    return false;
+    return getHomeroomClassIds(currentUser).includes(cls.id);
   };
 
   const binaanClasses = useMemo(() => {
@@ -205,9 +188,10 @@ export const RekapitulasiTable: React.FC<RekapitulasiTableProps> = ({
   // Santri pada kelas yang sedang dipilih (sebelum sub-filter status)
   const classStudents = useMemo(() => {
     return students.filter(
-      (s) => (!selectedClassId || selectedClassId === 'all' || (s.classId || '1a') === selectedClassId)
+      (s) => availableClasses.some(item => item.id === s.classId) &&
+        (!selectedClassId || selectedClassId === 'all' || s.classId === selectedClassId)
     );
-  }, [students, selectedClassId]);
+  }, [students, selectedClassId, availableClasses]);
 
   // Statistik agregat kelas binaan untuk diagnostik cepat wali kelas
   const stats = useMemo(() => {

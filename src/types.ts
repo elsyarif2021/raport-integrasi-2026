@@ -54,6 +54,14 @@ export interface CalculatedStudent extends StudentRecord {
 }
 
 export type UserRole = 'guru' | 'wali_kelas' | 'admin';
+export interface PinBulkCandidate {
+  name:string; role:UserRole; classNames:string[]; subjectNames:string[]; exists:boolean; accountRole?:UserRole;
+}
+export interface PinBulkResult {
+  created:Array<{id:string;name:string;role:UserRole;pin:string;path:string;classNames:string[];subjectNames:string[]}>;
+  skipped:Array<{name:string;reason:string}>;
+  promoted?:Array<{id:string;name:string;role:UserRole;path:string}>;
+}
 
 /**
  * 2 Jenjang Utama di Pondok Modern Al-Ghozali:
@@ -64,6 +72,7 @@ export type UserRole = 'guru' | 'wali_kelas' | 'admin';
 export type JenjangUnit = 'SMP' | 'SMA' | 'TMMIA';
 
 export interface AuthUser {
+  loginMethod?: 'pin' | 'chatgpt';
   role: UserRole;
   name: string;
   unit?: JenjangUnit;
@@ -75,6 +84,7 @@ export interface AuthUser {
   assignedClassIdsByUnit?: Record<JenjangUnit, string[]>;
   assignedSubjectNames?: string[];
   editableSubjectsByClass?: Record<string, string[]>;
+  homeroomClassIds?: string[];
   homeroomClassId?: string;
   homeroomClassName?: string;
 }

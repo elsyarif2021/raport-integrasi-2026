@@ -1,48 +1,8 @@
-import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { defineConfig } from 'vite';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-export default defineConfig(() => {
-  return {
-    plugins: [react(), tailwindcss()],
-    resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
-    },
-    build: {
-      chunkSizeWarningLimit: 1500,
-      rollupOptions: {
-        output: {
-          manualChunks(id: string) {
-            if (id.includes('node_modules')) {
-              if (id.includes('react') || id.includes('react-dom')) {
-                return 'react-vendor';
-              }
-              if (id.includes('xlsx') || id.includes('jspdf') || id.includes('html2canvas')) {
-                return 'export-tools';
-              }
-              if (id.includes('lucide-react')) {
-                return 'lucide-icons';
-              }
-            }
-          },
-        },
-      },
-    },
-    server: {
-      host: '127.0.0.1',
-      port: 3000,
-      // HMR is disabled in AI Studio via DISABLE_HMR env var.
-      // Do not modify—file watching is disabled to prevent flickering during agent edits.
-      hmr: process.env.DISABLE_HMR !== 'true',
-      // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
-      watch: process.env.DISABLE_HMR === 'true' ? null : {},
-    },
-  };
+export default defineConfig({
+  plugins:[react()],
+  define:{'import.meta.env.VITE_RAPORT_HOST':JSON.stringify('vercel')},
+  build:{outDir:'dist',chunkSizeWarningLimit:1800},
+  server:{host:'0.0.0.0',allowedHosts:['terminal.local']},
 });

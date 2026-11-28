@@ -1,140 +1,53 @@
-import { login } from '../services/raportApi';
-import React, { useState } from 'react';
-import { AuthUser, JenjangUnit } from '../types';
+import React, { useEffect, useState } from 'react';
+import type { AuthUser, JenjangUnit } from '../types';
+import { loginWithPin, type LoginLinkPreview } from '../services/raportApi';
+import { usesSharedBackend, ownerAccessUrl } from '../services/hosting';
+import { loginReturnPath } from '../utils/loginLink';
 import { SchoolLogo } from './SchoolLogo';
-import {
-  GraduationCap,
-  ShieldCheck,
-  Lock,
-  Eye,
-  EyeOff,
-  LogIn,
-  BookOpen,
-  CheckCircle2,
-  AlertCircle,
-  Sparkles,
-  School,
-  KeyRound,
-  UserCheck,
-} from 'lucide-react';
+import { ShieldCheck, BookOpen, GraduationCap, Loader2 } from 'lucide-react';
 
 interface LoginViewProps {
   onLoginSuccess: (user: AuthUser, unit: JenjangUnit) => void;
+  personalLink?: LoginLinkPreview | null;
+  linkToken?: string | null;
+  pinSlug?: string | null;
+  accountMismatch?: boolean;
+  inactiveLink?: boolean;
+  errorMessage?: string;
+  noticeMessage?: string;
 }
-
-export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess }) => {
-  const [selectedUnit, setSelectedUnit] = useState<JenjangUnit>('SMP');
-  const [password, setPassword] = useState<string>('');
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>('');
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const [username, setUsername] = useState('');
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage('');
-    setIsLoading(true);
+export const LoginView: React.FC<LoginViewProps> = ({ onLoginSuccess, personalLink, linkToken, pinSlug, accountMismatch, inactiveLink, errorMessage, noticeMessage }) => {
+  const [name,setName]=useState(personalLink?.name??'');
+  const [pin,setPin]=useState('');
+  const [busy,setBusy]=useState(false);
+  const [error,setError]=useState('');
+  const usePin=Boolean(pinSlug)||!linkToken;
+  useEffect(()=>{setName(personalLink?.name??'');setPin('');setError('');},[personalLink?.name,pinSlug]);
+  async function submit(event:React.FormEvent) {
+    event.preventDefault();setBusy(true);setError('');
     try {
-      const user = await login(username.trim(), password);
-      onLoginSuccess(user, selectedUnit);
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Login gagal.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-[100dvh] lg:h-[100dvh] bg-gradient-to-br from-slate-50 via-emerald-50/30 to-teal-50/40 flex flex-col justify-between items-center p-2.5 sm:p-4 lg:p-3 font-sans text-stone-800 selection:bg-emerald-500 selection:text-white relative overflow-y-auto lg:overflow-hidden">
-      <div className="fixed inset-0 pointer-events-none overflow-hidden select-none z-0">
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-[650px] h-[380px] bg-emerald-200/30 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -right-24 w-[450px] h-[450px] bg-teal-200/25 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-1/3 -left-24 w-[380px] h-[380px] bg-amber-100/40 rounded-full blur-3xl pointer-events-none" />
-        <svg className="w-full h-full opacity-[0.14]" xmlns="http://www.w3.org/2000/svg">
-          <defs><pattern id="islamic-grid-light" width="60" height="60" patternUnits="userSpaceOnUse">
-            <path d="M30 0 L60 30 L30 60 L0 30 Z M30 8 L52 30 L30 52 L8 30 Z" fill="none" stroke="#059669" strokeWidth="1.2" />
-            <circle cx="30" cy="30" r="2.5" fill="#d97706" fillOpacity="0.4" />
-          </pattern></defs>
-          <rect width="100%" height="100%" fill="url(#islamic-grid-light)" />
-        </svg>
-      </div>
-
-      <header className="relative z-10 w-full max-w-xl text-center pt-0.5 sm:pt-1 shrink-0">
-        <div className="inline-flex items-center justify-center p-1 mb-0"><SchoolLogo size={52} className="filter drop-shadow-md transition-transform hover:scale-105" /></div>
-        <div className="space-y-0.5">
-          <h1 className="text-lg sm:text-xl font-black tracking-tight text-[#174D3A] flex items-center justify-center gap-2">RAPORT INTEGRASI</h1>
-          <p className="text-[10px] sm:text-[11px] font-semibold text-stone-600">Pondok Modern Al-Ghozali</p>
-          <div className="flex items-center justify-center gap-2 text-amber-500 my-1">
-            <div className="w-12 h-[1px] bg-gradient-to-r from-transparent to-amber-400" /><span className="text-xs font-bold">✦</span><div className="w-12 h-[1px] bg-gradient-to-l from-transparent to-amber-400" />
-          </div>
-          <h2 className="text-xs sm:text-sm font-extrabold text-[#174D3A] tracking-wide uppercase">
-            LOGIN
-          </h2>
-          <p className="text-[10px] sm:text-[11px] text-stone-500">Masuk dengan akun sekolah. Server menentukan peran dan penugasan Anda.</p>
-        </div>
-      </header>
-
-      <main className="relative z-10 w-full max-w-4xl flex-1 min-h-0 flex items-center justify-center py-1.5 sm:py-2">
-        <div className="w-full max-w-3xl bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-3xl shadow-xl shadow-emerald-950/5 overflow-hidden">
-          <div className="h-1.5 w-full bg-gradient-to-r from-emerald-600 via-amber-400 to-emerald-600" />
-          <div className="p-3 sm:p-4 lg:p-4">
-            <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-[190px_minmax(0,1fr)] gap-3 lg:gap-5 items-stretch">
-              <div className="space-y-1.5 lg:row-span-5">
-                <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5"><UserCheck size={14} className="text-emerald-700" /><span>Akses Akun Sekolah</span></label>
-                <div className="grid grid-cols-1 gap-1.5">
-                  <div className="flex flex-col items-center justify-center p-2.5 rounded-xl border text-center bg-emerald-50 border-emerald-200 text-emerald-950">
-                    <BookOpen size={18} className="text-emerald-700" /><span className="font-bold text-xs">Guru</span><span className="text-[10px] text-stone-500 mt-0.5">Mapel</span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border text-center bg-emerald-50 border-emerald-200 text-emerald-950">
-                    <GraduationCap size={18} className="text-emerald-700" /><span className="font-bold text-xs">Wali Kelas</span><span className="text-[10px] text-stone-500 mt-0.5">Cetak & Nilai</span>
-                  </div>
-                  <div className="flex flex-col items-center justify-center p-3 rounded-xl border text-center bg-amber-50 border-amber-200 text-amber-950">
-                    <ShieldCheck size={18} className="text-amber-700" /><span className="font-bold text-xs">Administrator</span><span className="text-[10px] text-stone-500 mt-0.5">Akses Penuh</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-start-2 flex flex-col gap-2 min-w-0">
-                <div className="space-y-1.5 pt-0.5">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5"><School size={14} className="text-emerald-700" /><span>Jenjang awal</span></label>
-                    <span className="text-[11px] text-emerald-700 font-medium hidden sm:inline">Mapel Kepondokan: TMMIA</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {(['SMP', 'SMA'] as JenjangUnit[]).map((unit) => (
-                      <button key={unit} type="button" onClick={() => setSelectedUnit(unit)} className={`py-2 px-3 rounded-xl border text-center font-bold text-xs transition-all duration-150 flex flex-col items-center justify-center ${selectedUnit === unit ? 'bg-emerald-700 text-white border-emerald-600 shadow-sm ring-1 ring-emerald-400' : 'bg-stone-50 text-stone-700 border-stone-200 hover:bg-stone-100 hover:border-stone-300'}`}>
-                        <span className="font-bold text-sm">{unit === 'SMP' ? 'Tingkat SMP' : 'Tingkat SMA'}</span>
-                        <span className={`text-[10px] mt-0.5 line-clamp-1 ${selectedUnit === unit ? 'text-emerald-100' : 'text-stone-500'}`}>{unit === 'SMP' ? 'Mukim 1-3 • Full Day VII-IX' : 'Mukim 1-3 Int & 4-6 • Full Day X-XII'}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="space-y-2 pt-1 animate-fadeIn lg:col-start-2">
-                  <label className="block text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center gap-1.5"><KeyRound size={14} className="text-amber-600" /><span>Akun Sekolah</span></label>
-                  <input required autoComplete="username" aria-label="Nama pengguna" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Nama pengguna" maxLength={64} className="w-full px-3 py-2 border border-stone-300 rounded-lg text-sm" />
-                  <div className="relative">
-                    <input required maxLength={256} aria-label="Kata sandi" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Kata sandi" autoComplete="current-password" className="w-full pl-4 pr-12 py-2.5 bg-white border border-stone-300 rounded-xl text-stone-900 font-mono text-base font-bold tracking-widest focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition shadow-sm" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-stone-400 hover:text-stone-700 transition" title={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-stone-500 px-1"><span className="flex items-center gap-1"><Lock size={12} className="text-amber-600" />Gunakan akun yang diberikan sekolah</span></div>
-                </div>
-                  {errorMessage && <div className="flex items-center gap-2 p-2.5 bg-rose-50 border border-rose-300 rounded-xl text-rose-800 text-xs animate-shake"><AlertCircle size={16} className="text-rose-600 shrink-0" /><span>{errorMessage}</span></div>}
-
-                <button type="submit" disabled={isLoading} className="w-full py-2.5 px-6 rounded-xl bg-[#174D3A] hover:bg-[#123c2d] active:scale-[0.99] text-white font-extrabold text-sm sm:text-base tracking-wider flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer disabled:opacity-70">
-                  {isLoading ? <span className="inline-block w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <><LogIn size={18} className="text-amber-300" /><span>MASUK</span></>}
-                </button>
-                <div className="text-center pt-0"><span className="text-[11px] text-stone-500 inline-flex items-center gap-1">ⓘ Butuh bantuan? Hubungi Admin IT</span></div>
-              </div>
-            </form>
-          </div>
-          <div className="px-6 py-3 bg-stone-50/80 border-t border-stone-200 flex items-center justify-between text-[11px] text-stone-500"><span className="flex items-center gap-1.5"><CheckCircle2 size={13} className="text-emerald-600" /><span>Otorisasi Penugasan Resmi</span></span><span className="font-medium text-stone-600">T.A. 2026/2027</span></div>
-        </div>
-      </main>
-
-      <footer className="relative z-10 w-full max-w-xl text-center pb-0 pt-0.5 text-[9px] text-stone-500 space-y-0.5 shrink-0">
-        <p>© 2026 Pondok Modern Al-Ghozali • Gunung Sindur, Bogor, Jawa Barat</p>
-        <p className="font-arabic text-xs text-stone-600" dir="rtl">المعهد العصري الغزالي للتربية الإسلامية</p>
-      </footer>
-    </div>
-  );
+      const user=await loginWithPin(name,pin,pinSlug??undefined);
+      setPin('');onLoginSuccess(user,user.availableUnits?.[0]??'SMP');
+    } catch(error) {setError(error instanceof Error?error.message:'Gagal masuk. Silakan coba kembali.');}
+    finally {setBusy(false);}
+  }
+  const roleLabel=personalLink?.role==='admin'?'Administrator':personalLink?.role==='wali_kelas'?'Wali kelas':'Guru';
+  return <main className="min-h-dvh bg-emerald-50 flex items-center justify-center px-5 py-10">
+    <section className="w-full max-w-lg rounded-3xl border border-emerald-200 bg-white p-7 sm:p-10 shadow-xl shadow-emerald-950/5 text-center">
+      <SchoolLogo size={72} className="mx-auto mb-5" />
+      <p className="text-sm font-semibold tracking-widest uppercase text-emerald-700">Pondok Modern Al-Ghozali</p>
+      <h1 className="text-3xl font-bold text-slate-900 mt-3">{personalLink?'Selamat datang':'Raport Integrasi'}</h1>
+      {personalLink?<div className="mt-5 rounded-xl border border-emerald-200 bg-emerald-50 p-4"><p className="text-xl font-bold text-emerald-950 break-words">{personalLink.name}</p><p className="mt-2 text-sm font-medium text-emerald-800">{roleLabel}{personalLink.role!=='admin'?' · Sesuai penugasan':''}</p></div>:<p className="text-base text-slate-600 leading-relaxed mt-4">Masuk menggunakan nama akun dan PIN Anda.</p>}
+      {noticeMessage&&<p role="status" className="mt-5 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-900">{noticeMessage}</p>}
+      {(error||errorMessage)&&<p role="alert" className="mt-5 rounded-xl bg-rose-50 p-4 text-sm text-rose-800">{error||errorMessage}</p>}
+      {inactiveLink?<a href="/" target="_top" className="mt-6 inline-flex rounded-xl bg-emerald-800 px-5 py-3 font-semibold text-white">Buka halaman masuk umum</a>:usePin?<form onSubmit={submit} className="mt-6 space-y-4 text-left">
+        {!personalLink&&<label className="block text-sm font-semibold text-slate-700">Nama<input required autoComplete="username" value={name} maxLength={200} onChange={event=>setName(event.target.value)} placeholder="Nama yang ditetapkan admin" className="mt-1.5 block w-full rounded-xl border border-slate-300 px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500"/></label>}
+        <label className="block text-sm font-semibold text-slate-700">PIN<input required type="password" inputMode="numeric" autoComplete="current-password" pattern="[0-9]{6,12}" minLength={6} maxLength={12} value={pin} onChange={event=>setPin(event.target.value)} placeholder="Masukkan PIN" className="mt-1.5 block w-full rounded-xl border border-slate-300 px-4 py-3 text-base tracking-widest focus:outline-none focus:ring-2 focus:ring-emerald-500"/></label>
+        <button disabled={busy} type="submit" className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-800 px-5 py-3.5 text-base font-semibold text-white hover:bg-emerald-900 disabled:opacity-60">{busy?<Loader2 size={20} className="animate-spin"/>:<ShieldCheck size={20}/>}Masuk</button>
+        <p className="text-center text-sm text-slate-500">Lupa PIN? Hubungi administrator sekolah.</p>
+      </form>:<><a href={usesSharedBackend?ownerAccessUrl+'#akses='+(linkToken??''):(accountMismatch?'/signout-with-chatgpt?return_to=':'/signin-with-chatgpt?return_to=')+encodeURIComponent(loginReturnPath(linkToken??null))} target="_top" className="mt-7 flex justify-center items-center gap-2 rounded-xl bg-emerald-800 text-white px-5 py-3.5 font-semibold text-base"><ShieldCheck size={20}/>{accountMismatch?'Ganti akun ChatGPT':'Masuk dengan ChatGPT'}</a><p className="mt-4 text-sm text-slate-600">Gunakan email ChatGPT yang ditetapkan admin untuk link ini.</p></>}
+      {usePin&&<details className="mt-6 border-t border-slate-200 pt-4 text-sm text-slate-600"><summary className="cursor-pointer">Akses pemilik dengan ChatGPT</summary><a href={usesSharedBackend?ownerAccessUrl:'/signin-with-chatgpt?return_to=%2F'} target="_top" className="mt-3 inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 font-semibold text-emerald-800"><ShieldCheck size={18}/>{usesSharedBackend?'Buka akses pemilik di Sites':'Masuk dengan ChatGPT'}</a>{usesSharedBackend&&<p className="mt-2 text-sm">Guru dan admin tambahan masuk di sini memakai nama dan PIN yang sama dengan Sites.</p>}</details>}
+      <div className="grid grid-cols-3 gap-3 border-t border-slate-200 mt-6 pt-5 text-sm text-slate-700"><div><BookOpen className="mx-auto mb-2 text-emerald-700" size={21}/>Input Nilai</div><div><GraduationCap className="mx-auto mb-2 text-emerald-700" size={21}/>Rekap Kelas</div><div><ShieldCheck className="mx-auto mb-2 text-emerald-700" size={21}/>Akses Terbatas</div></div>
+    </section>
+  </main>;
 };

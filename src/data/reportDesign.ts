@@ -1,4 +1,5 @@
 export interface ReportDesignConfig {
+  frameDecoration?: 'simple' | 'ornate';
   // 1. Bingkai (Frame)
   framePaddingTop: number; // in px
   framePaddingBottom: number;
@@ -79,15 +80,16 @@ export interface DesignPreset {
 }
 
 export const DEFAULT_DESIGN_CONFIG: ReportDesignConfig = {
+  frameDecoration: 'simple',
   // Bingkai
   framePaddingTop: 16,
   framePaddingBottom: 16,
   framePaddingLeft: 20,
   framePaddingRight: 20,
-  frameBorderStyle: 'double',
-  frameBorderWidth: 3,
+  frameBorderStyle: 'solid',
+  frameBorderWidth: 1,
   frameBorderColor: '#174D3A',
-  frameOutlineWidth: 8,
+  frameOutlineWidth: 0,
   frameOutlineOffset: -12,
   frameOutlineColor: '#B28A3A',
   frameAccentColor: '#D8BE78',
@@ -97,9 +99,9 @@ export const DEFAULT_DESIGN_CONFIG: ReportDesignConfig = {
   tableMarginTop: 3,
   tableMarginBottom: 3,
   tableRowHeight: 22,
-  tableBorderWidth: 0.75,
-  tableBorderColor: '#1f2937',
-  tableHeaderBg: '#f8fafc',
+  tableBorderWidth: 0.6,
+  tableBorderColor: '#64748b',
+  tableHeaderBg: '#f3f4f6',
   numberColWidth: 5.5,
   colWidthNo: 5.5,
   colWidthSubjectAr: 28.5,
@@ -110,13 +112,13 @@ export const DEFAULT_DESIGN_CONFIG: ReportDesignConfig = {
   colWidthTerbilang: 28.5,
 
   // Ukuran Huruf
-  titleFontSize: 25,
-  subTitleFontSize: 15,
+  titleFontSize: 22,
+  subTitleFontSize: 13,
   studentInfoFontSize: 14.5,
   tableHeaderFontSize: 13,
   numberFontSize: 12,
   arabicSubjectFontSize: 14,
-  latinSubjectFontSize: 11.5,
+  latinSubjectFontSize: 12,
   scoreFontSize: 12.5,
   terbilangFontSize: 14,
   summaryFontSize: 13,
@@ -127,7 +129,7 @@ export const DEFAULT_DESIGN_CONFIG: ReportDesignConfig = {
   // Gaya Huruf
   arabicFontFamily: "'Traditional Arabic', 'Amiri', 'Scheherazade New', serif",
   latinFontFamily: "'Times New Roman', Arial, sans-serif",
-  arabicFontWeight: '700',
+  arabicFontWeight: 'normal',
   latinFontWeight: 'normal',
   isTitleItalic: false,
 
@@ -152,10 +154,17 @@ export const DEFAULT_DESIGN_CONFIG: ReportDesignConfig = {
 
 export const BUILT_IN_PRESETS: DesignPreset[] = [
   {
-    id: 'default-gold-green',
-    name: 'Klasik Hijau Emas (Resmi)',
-    description: 'Format standar resmi Pesantren Al-Ghozali dengan bingkai ganda hijau dan aksen emas.',
+    id: 'formal-simple',
+    name: 'Formal Sederhana',
+    description: 'Bingkai tipis, satu logo, dan tabel netral untuk cetak rapor sehari-hari.',
     config: { ...DEFAULT_DESIGN_CONFIG },
+    isBuiltIn: true,
+  },
+  {
+    id: 'default-gold-green',
+    name: 'Klasik Hijau Emas',
+    description: 'Bingkai dengan ornamen Islami hijau dan emas.',
+    config: { ...DEFAULT_DESIGN_CONFIG, frameDecoration: 'ornate', frameBorderStyle: 'double', frameBorderWidth: 3, frameOutlineWidth: 8, arabicFontWeight: '700' },
     isBuiltIn: true,
   },
   {

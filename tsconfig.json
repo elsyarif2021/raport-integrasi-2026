@@ -5,7 +5,9 @@
     "useDefineForClassFields": false,
     "module": "ESNext",
     "types": [
-      "vite/client"
+      "vite/client",
+      "node",
+      "@cloudflare/workers-types"
     ],
     "lib": [
       "ES2022",
@@ -32,4 +34,3 @@
     "sites"
   ]
 }
-

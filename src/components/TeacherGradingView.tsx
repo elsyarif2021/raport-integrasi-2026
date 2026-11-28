@@ -4,6 +4,7 @@ import { toEasternArabicNumerals, numberToArabicWords } from '../utils/arabicNum
 import { numberToIndonesianWords, getPredicateIndonesian } from '../utils/indonesianNumbers';
 import { findTeachersForSubjectAndClass } from '../data/teacherSubjectsDatabase';
 import { canUserEditSubject, getJenjangForClass } from '../utils/authHelpers';
+import { canManageClass } from '../utils/workspaceAccess';
 import * as XLSX from 'xlsx';
 import {
   downloadSubjectTemplateExcel,
@@ -52,13 +53,14 @@ interface TeacherGradingViewProps {
   currentUser?: AuthUser | null;
   activeJenjang?: JenjangUnit;
   onSelectJenjang?: (unit: JenjangUnit) => void;
+  availableJenjang?: JenjangUnit[];
 }
 
 export const TeacherGradingView: React.FC<TeacherGradingViewProps> = ({
   classes,
   selectedClassId,
   onSelectClassId,
-  subjects,
+  subjects: classSubjects,
   selectedSubjectId,
   onSelectSubjectId,
   studentsInClass,
@@ -68,6 +70,7 @@ export const TeacherGradingView: React.FC<TeacherGradingViewProps> = ({
   currentUser = null,
   activeJenjang,
   onSelectJenjang,
+  availableJenjang,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'pondok' | 'umum' | 'lisan' | 'diampu'>(() => currentUser?.role === 'guru' ? 'diampu' : 'all');
@@ -86,11 +89,12 @@ export const TeacherGradingView: React.FC<TeacherGradingViewProps> = ({
     nameAr: 'الأوّل - A تحفيظ (بنات)',
     waliKelasName: '',
   };
+  const subjects = classSubjects.filter(subject => canUserEditSubject(currentUser, subject.id, currentClass.id));
 
   const isAdmin = currentUser?.role === 'admin';
   const isWaliKelas = currentUser?.role === 'wali_kelas';
   const isGuru = currentUser?.role === 'guru';
-  const availableUnits: JenjangUnit[] = currentUser?.availableUnits?.filter(u => u === 'SMP' || u === 'SMA') || (isAdmin ? ['SMP', 'SMA'] : ['SMP']);
+  const availableUnits: JenjangUnit[] = availableJenjang ?? currentUser?.availableUnits?.filter(u => u === 'SMP' || u === 'SMA') ?? (isAdmin ? ['SMP', 'SMA'] : ['SMP']);
   const effectiveJenjang: JenjangUnit = activeJenjang || (currentClass ? getJenjangForClass(currentClass) : 'SMP');
   const currentSubject = subjects.find((s) => s.id === selectedSubjectId) || subjects[0] || {
     id: 's1',
@@ -127,7 +131,7 @@ export const TeacherGradingView: React.FC<TeacherGradingViewProps> = ({
 
   // Auto-select first authorized subject for guru when class changes
   React.useEffect(() => {
-    if (currentUser?.role === 'guru' && subjects.length > 0) {
+    if (currentUser?.role !== 'admin' && subjects.length > 0) {
       const isCurrentEditable = canUserEditSubject(currentUser, currentSubject.nameId, currentClass.id);
       if (!isCurrentEditable) {
         const firstEditable = subjects.find((s) => canUserEditSubject(currentUser, s.nameId, currentClass.id));
@@ -644,25 +648,12 @@ export const TeacherGradingView: React.FC<TeacherGradingViewProps> = ({
               Pilih Mata Pelajaran Yang Diajar di Kelas {currentClass.nameLatin}
             </h2>
             <p className="text-xs text-stone-500">
-              Menampilkan {subjects.length} mata pelajaran resmi kurikulum untuk kelas {currentClass.nameLatin}
+              Menampilkan {subjects.length} mata pelajaran sesuai penugasan untuk kelas {currentClass.nameLatin}
             </p>
           </div>
 
           {/* Category Filter Tabs */}
           <div className="flex items-center bg-stone-100 p-1 rounded-xl text-xs font-semibold overflow-x-auto">
-            {isGuru && (
-              <button
-                type="button"
-                onClick={() => setCategoryFilter('diampu')}
-                className={`px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
-                  categoryFilter === 'diampu'
-                    ? 'bg-emerald-600 text-white shadow-xs font-extrabold'
-                    : 'text-emerald-800 hover:text-emerald-950 font-bold bg-emerald-50/80 hover:bg-emerald-100'
-                }`}
-              >
-                Diampu Saya ({subjects.filter((s) => canUserEditSubject(currentUser, s.nameId, currentClass.id)).length})
-              </button>
-            )}
             {isGuru ? (
               <span className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-xs font-extrabold whitespace-nowrap">
                 Diampu Saya ({subjects.filter((s) => canUserEditSubject(currentUser, s.nameId, currentClass.id)).length})
@@ -1125,7 +1116,7 @@ export const TeacherGradingView: React.FC<TeacherGradingViewProps> = ({
                 <th className="py-2.5 px-4 min-w-[170px] text-right font-arabic text-xs">بالحروف (Tafqit)</th>
                 <th className="py-2.5 px-3 w-28 text-center">Predikat</th>
                 <th className="py-2.5 px-3 w-24 text-center">Status</th>
-                {(isAdmin || isWaliKelas) && (
+                {canManageClass(currentUser, currentClass.id) && (
                   <th className="no-print py-2.5 px-3 w-24 text-center">Aksi</th>
                 )}
               </tr>
@@ -1133,7 +1124,7 @@ export const TeacherGradingView: React.FC<TeacherGradingViewProps> = ({
             <tbody className="divide-y divide-stone-200">
               {filteredStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={isAdmin || isWaliKelas ? 9 : 8} className="py-12 text-center text-stone-400">
+                  <td colSpan={canManageClass(currentUser, currentClass.id) ? 9 : 8} className="py-12 text-center text-stone-400">
                     <Users size={32} className="mx-auto mb-2 opacity-40" />
                     <p className="font-semibold">Tidak ada santri di kelas ini.</p>
                   </td>
@@ -1234,7 +1225,7 @@ export const TeacherGradingView: React.FC<TeacherGradingViewProps> = ({
                       </td>
 
                       {/* Aksi (Admin & Wali Kelas Only) */}
-                      {(isAdmin || isWaliKelas) && (
+                      {canManageClass(currentUser, currentClass.id) && (
                         <td className="no-print py-2 px-3 text-center">
                           <button
                             type="button"

@@ -31,16 +31,17 @@ function getAssignments() {
 
 export function permissions({ name, role }: AccountIdentity) {
   const normalized = normalizeTeacherName(name);
-  const homeroom = role === 'wali_kelas' ? DAFTAR_WALI_KELAS.find((entry) =>
+  const homerooms = role === 'wali_kelas' ? DAFTAR_WALI_KELAS.filter((entry) =>
     normalized && normalizeTeacherName(entry.waliName) === normalized &&
     Boolean(entry.classId && classes.has(entry.classId))
-  ) : undefined;
+  ) : [];
+  const homeroomClassIds = [...new Set(homerooms.map(entry => entry.classId!))];
   const assignedClassIdsByUnit: Record<JenjangUnit, string[]> = { SMP: [], SMA: [], TMMIA: [] };
   const subjectIdsByClass = new Map<string, Set<string>>();
   if (role !== 'admin' && normalized) {
     for (const [classId, subjects] of getAssignments()) {
       const subjectIds = new Set([...subjects].filter(([, names]) => names.has(normalized)).map(([id]) => id));
-      if (subjectIds.size || homeroom?.classId === classId) {
+      if (subjectIds.size || homeroomClassIds.includes(classId)) {
         subjectIdsByClass.set(classId, subjectIds);
         assignedClassIdsByUnit[getJenjangForClass(classes.get(classId))].push(classId);
         assignedClassIdsByUnit.TMMIA.push(classId);
@@ -48,19 +49,20 @@ export function permissions({ name, role }: AccountIdentity) {
     }
   }
   const editableSubjectsByClass = Object.fromEntries([...subjectIdsByClass].map(([classId, subjects]) => [
-    classId, homeroom?.classId === classId ? [...(getAssignments().get(classId)?.keys() || [])] : [...subjects],
+    classId, homeroomClassIds.includes(classId) ? [...(getAssignments().get(classId)?.keys() || [])] : [...subjects],
   ]));
   const user: AuthUser = {
     name, role, assignedClassIdsByUnit, editableSubjectsByClass,
     availableUnits: role === 'admin' ? units : units.filter((unit) => assignedClassIdsByUnit[unit].length),
     assignedClassIds: [...subjectIdsByClass.keys()],
-    homeroomClassId: homeroom?.classId,
-    homeroomClassName: homeroom?.className,
+    homeroomClassIds,
+    homeroomClassId: homerooms[0]?.classId,
+    homeroomClassName: homerooms[0]?.className,
   };
   return {
     user,
     canRead: (classId: string) => role === 'admin' || subjectIdsByClass.has(classId),
-    canReadFull: (classId: string) => role === 'admin' || homeroom?.classId === classId,
+    canReadFull: (classId: string) => role === 'admin' || homeroomClassIds.includes(classId),
     canScore: (classId: string, subjectId: string) =>
       role === 'admin' || Boolean(editableSubjectsByClass[classId]?.includes(subjectId)),
   };

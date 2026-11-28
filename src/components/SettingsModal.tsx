@@ -4,6 +4,7 @@ import { X, Save, Sliders, RotateCcw, Calendar, MapPin, Sparkles, Building, Awar
 import { INITIAL_SCHOOL_CONFIG } from '../data/initialData';
 
 interface SettingsModalProps {
+  embedded?: boolean;
   isOpen: boolean;
   onClose: () => void;
   config: SchoolConfig;
@@ -15,6 +16,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClose,
   config,
   onSave,
+  embedded = false,
 }) => {
   const [formData, setFormData] = useState<SchoolConfig>(config);
 
@@ -47,8 +49,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-8 overflow-hidden border border-stone-200">
+    <div className={embedded ? 'w-full' : 'fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 overflow-y-auto'}>
+      <div className={embedded ? 'bg-white rounded-2xl w-full overflow-hidden border border-stone-200' : 'bg-white rounded-2xl shadow-2xl max-w-2xl w-full my-8 overflow-hidden border border-stone-200'}>
         {/* Header */}
         <div className="px-6 py-4 bg-stone-800 text-white flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -65,7 +67,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[80vh] overflow-y-auto text-xs">
+        <form onSubmit={handleSubmit} className={`p-6 space-y-6 text-sm ${embedded ? '' : 'max-h-[80vh] overflow-y-auto'}`}>
           {/* Section 1: Nama Raport & Lembaga */}
           <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 space-y-3">
             <div className="flex items-center gap-1.5 text-stone-800 font-bold text-xs uppercase tracking-wide border-b border-stone-200 pb-2">
@@ -352,6 +354,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           </div>
 
+          <div className="sticky bottom-0 flex flex-wrap items-center justify-between gap-3 border-t border-stone-200 bg-white py-4">
+            <button type="button" onClick={handleReset} className="flex items-center gap-2 rounded-lg border border-stone-300 px-4 py-2.5 text-sm text-stone-700 hover:bg-stone-50"><RotateCcw size={16}/>Format awal</button>
+            <div className="flex gap-2"><button type="button" onClick={onClose} className="rounded-lg px-4 py-2.5 text-sm font-medium text-stone-600 hover:bg-stone-50">Batal</button><button type="submit" className="flex items-center gap-2 rounded-lg bg-emerald-800 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-900"><Save size={16}/>Simpan pengaturan</button></div>
+          </div>
         </form>
       </div>
     </div>

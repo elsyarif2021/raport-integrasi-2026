@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ClipboardPaste, CheckCircle2 } from 'lucide-react';
 import type { CalculatedStudent, ClassItem, AuthUser } from '../types';
+import { canManageClass, getWorkspaceClasses } from '../utils/workspaceAccess';
 
 const SIKAP_OPTIONS = ['Sangat Baik', 'Baik', 'Cukup', 'Perlu Bimbingan'];
 
@@ -27,10 +28,11 @@ export function SikapView({
 
   const isAdmin = currentUser?.role === 'admin';
   const isWali = currentUser?.role === 'wali_kelas';
-  const canEdit = isAdmin || isWali;
-  const availableClasses = useMemo(() => classes.filter((c) => c.id !== 'all'), [classes]);
+  const canEdit = canManageClass(currentUser, selectedClassId);
+  const availableClasses = useMemo(() => getWorkspaceClasses(currentUser, 'sikap', classes), [classes, currentUser]);
 
   const applyPastedSikap = (raw: string) => {
+    if (!canEdit) return;
     const values = raw
       .split(/\r?\n|\t|,|;|\|/)
       .map((v) => v.trim())
@@ -80,6 +82,7 @@ export function SikapView({
           <div className="flex items-center gap-2">
             <button
               type="button"
+              disabled={!canEdit}
               onClick={() => setIsPasteOpen(true)}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold"
             >
@@ -113,6 +116,7 @@ export function SikapView({
                   <td className="px-4 py-2.5">
                     <select
                       value={student.sikap || ''}
+                      disabled={!canEdit}
                       onChange={(e) => onUpdateSikap(student.id, e.target.value)}
                       className="w-full max-w-xs border border-stone-300 rounded-lg px-3 py-2 text-xs font-semibold bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 outline-none"
                     >

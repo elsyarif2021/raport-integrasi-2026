@@ -69,6 +69,7 @@ export const BatchPrintView: React.FC<BatchPrintViewProps> = ({
           body > #root > div > header,
           body > #root > div > main,
           body > #root > div > footer,
+          .app-shell,
           .no-print,
           header,
           footer,

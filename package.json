@@ -4,43 +4,51 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "npx vercel dev",
+    "dev": "vite",
     "build": "vite build",
-    "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit",
-    "account": "tsx scripts/manage.ts account",
-    "db:setup": "tsx scripts/manage.ts setup",
-    "db:import": "tsx scripts/manage.ts import",
-    "dev:ui": "vite --host 127.0.0.1 --port 3000 --strictPort",
-    "account:revoke": "tsx scripts/manage.ts revoke",
-    "db:extract": "tsx scripts/extract-legacy.ts"
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "db:generate": "drizzle-kit generate",
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@tailwindcss/vite": "^4.3.3",
-    "@vitejs/plugin-react": "^6.1.1",
+    "@fontsource/amiri": "^5.3.0",
+    "@fontsource/cinzel": "^5.3.0",
+    "@fontsource/plus-jakarta-sans": "^5.3.0",
+    "@fontsource/scheherazade-new": "^5.3.0",
     "fflate": "^0.8.3",
+    "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
-    "pg": "^8.23.1",
-    "react": "^19.0.1",
-    "react-dom": "^19.0.1",
-    "recharts": "^3.10.1",
-    "vite": "^8.3.0",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
+    "recharts": "^3.8.0",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
-    "@types/node": "^22.14.0",
-    "@types/pg": "^8.23.1",
-    "@types/react": "^19.3.0",
-    "@types/react-dom": "^19.3.0",
-    "autoprefixer": "^10.4.21",
-    "tailwindcss": "^4.3.3",
-    "tsx": "^4.23.15",
-    "typescript": "^7.0.2"
+    "@cloudflare/vite-plugin": "1.37.1",
+    "@cloudflare/workers-types": "4.20260515.1",
+    "@tailwindcss/postcss": "4.2.1",
+    "@types/node": "22.19.19",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.2",
+    "drizzle-kit": "0.31.10",
+    "drizzle-orm": "0.45.2",
+    "tailwindcss": "4.2.1",
+    "tsx": "^4.20.0",
+    "typescript": "5.9.3",
+    "vite": "8.0.13",
+    "wrangler": "4.92.0"
   },
   "engines": {
     "node": "24.x"
+  },
+  "overrides": {
+    "miniflare": {
+      "sharp": "0.35.4"
+    }
   }
 }

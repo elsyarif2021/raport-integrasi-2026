@@ -873,7 +873,8 @@ export function sanitizeClonedDocumentForHtml2Canvas(clonedDoc: Document, cloned
     clonedEl.style.maxWidth = '794px';
     clonedEl.style.maxHeight = '1248px';
     clonedEl.style.margin = '0';
-    clonedEl.style.padding = '0';
+    // Full Day margins live on the page root; retain them during capture.
+    clonedEl.style.padding = clonedEl.style.padding || '0';
     clonedEl.style.boxSizing = 'border-box';
     clonedEl.style.position = 'absolute';
     clonedEl.style.top = '0';
@@ -956,6 +957,37 @@ export function sanitizeClonedDocumentForHtml2Canvas(clonedDoc: Document, cloned
   });
 }
 
+// Capture an isolated browser-layout snapshot with native Arabic shaping.
+// Keeping the snapshot independent also prevents a change of pupil or view
+// during export from changing the downloaded document.
+async function captureReportCanvas(element: HTMLElement): Promise<HTMLCanvasElement> {
+  const rect = element.getBoundingClientRect();
+  const clone = element.cloneNode(true) as HTMLElement;
+  const originalFields = element.querySelectorAll<HTMLElement>('input,textarea,select');
+  clone.querySelectorAll<HTMLElement>('input,textarea,select').forEach((field,index) => {
+    const value = document.createElement('span');
+    value.textContent = (originalFields[index] as HTMLInputElement | undefined)?.value || '';
+    field.replaceWith(value);
+  });
+  clone.querySelectorAll('.no-print,.excel-table-toolbar,[data-editing-control],button').forEach(node=>node.remove());
+  clone.querySelectorAll<HTMLElement>('.col-selected-cell,.col-selected-th').forEach(node=>{
+    node.classList.remove('col-selected-cell','col-selected-th');node.style.backgroundColor='';
+  });
+  clone.querySelectorAll<HTMLElement>('*').forEach(node=>{
+    node.style.outline='none';node.style.boxShadow='none';node.style.cursor='default';
+    if(node.style.backgroundColor==='rgb(240, 253, 244)')node.style.backgroundColor='';
+  });
+  Object.assign(clone.style,{margin:'0',boxShadow:'none',borderRadius:'0',transform:'none',position:'relative',top:'0',left:'0'});
+  const stage=document.createElement('div');stage.className='no-print';
+  Object.assign(stage.style,{position:'fixed',left:'-10000px',top:'0',width:rect.width+'px',pointerEvents:'none',backgroundColor:'#ffffff'});
+  stage.appendChild(clone);document.body.appendChild(stage);
+  try {
+    await waitForAssetsToLoad(clone);
+    const {toCanvas}=await import('html-to-image');
+    return await toCanvas(clone,{width:rect.width,height:rect.height,pixelRatio:3,backgroundColor:'#ffffff',cacheBust:false,preferredFontFormat:'woff2'});
+  } finally {stage.remove();}
+}
+
 /**
  * Ekspor Raport Santri ke format PDF Resolusi Tinggi (Standar F4 / Folio 210mm x 330mm)
  */
@@ -972,27 +1004,7 @@ export async function exportRaportToPdf(
     // 1. Reset parent window scroll so element has clean 0-based offset
     window.scrollTo(0, 0);
 
-    // 2. Wait for fonts, images, and layout stabilization
-    await waitForAssetsToLoad(element);
-
-    // 3. Capture element in fixed dimensions matching exact F4 (210mm x 330mm -> 794px x 1248px)
-    const canvas = await html2canvas(element, {
-      scale: 3, // 3x High resolution (2382px x 3744px) for razor-sharp vector-like print quality
-      useCORS: true,
-      logging: false,
-      backgroundColor: '#ffffff',
-      width: 794,
-      height: 1248,
-      windowWidth: 794,
-      windowHeight: 1248,
-      x: 0,
-      y: 0,
-      scrollX: 0,
-      scrollY: 0,
-      onclone: (clonedDoc, clonedEl) => {
-        sanitizeClonedDocumentForHtml2Canvas(clonedDoc, clonedEl);
-      },
-    });
+    const canvas = await captureReportCanvas(element);
 
     const pdf = new jsPDF({
       orientation: 'portrait',

@@ -26,5 +26,10 @@
       ]
     }
   ],
-  "installCommand": "npm ci --include=dev"
+  "installCommand": "npm ci --include=dev",
+  "functions": {
+    "api/raport.ts": {
+      "maxDuration": 30
+    }
+  }
 }

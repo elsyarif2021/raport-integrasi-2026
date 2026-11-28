@@ -63,7 +63,7 @@ export const ReportSignatures: React.FC<ReportSignaturesProps> = ({ config, onOp
         <div className="min-w-[160px] flex flex-col items-center">
           <div 
             className="font-bold text-stone-950"
-            style={{ fontSize: `${signatureTitleFontSize}px` }}
+            style={{ fontSize: `${signatureTitleFontSize}px`, whiteSpace: 'nowrap' }}
           >
             {config.waliKelasLabelAr || 'ولي الفصل'}
           </div>
@@ -87,7 +87,7 @@ export const ReportSignatures: React.FC<ReportSignaturesProps> = ({ config, onOp
         <div className="min-w-[160px] flex flex-col items-center">
           <div 
             className="font-bold text-stone-950"
-            style={{ fontSize: `${signatureTitleFontSize}px` }}
+            style={{ fontSize: `${signatureTitleFontSize}px`, whiteSpace: 'nowrap' }}
           >
             {config.waliSantriLabelAr || 'ولي الأمر'}
           </div>
@@ -107,7 +107,7 @@ export const ReportSignatures: React.FC<ReportSignaturesProps> = ({ config, onOp
         <div className="min-w-[180px] flex flex-col items-center">
           <div 
             className="font-bold text-stone-950"
-            style={{ fontSize: `${signatureTitleFontSize}px` }}
+            style={{ fontSize: `${signatureTitleFontSize}px`, whiteSpace: 'nowrap' }}
           >
             {config.direkturLabelAr || 'مدير المعهد'}
           </div>

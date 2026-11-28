@@ -138,7 +138,7 @@ export const ReportCertificateFullDay: React.FC<ReportCertificateFullDayProps> =
           <SchoolLogo size={70} />
         </div>
         <div className="flex-1 text-center px-2">
-          <h2 className="text-[13pt] font-extrabold uppercase tracking-wide leading-tight text-stone-900 m-0">
+          <h2 className="text-[13pt] font-bold uppercase tracking-wide leading-tight text-stone-900 m-0">
             LAPORAN HASIL BELAJAR PESERTA DIDIK
           </h2>
           <h3 className="text-[11pt] font-bold uppercase tracking-wider leading-tight text-stone-800 m-0 mt-0.5">
@@ -146,7 +146,7 @@ export const ReportCertificateFullDay: React.FC<ReportCertificateFullDayProps> =
               ? config.subTitleId
               : 'ASESMEN TENGAH SEMESTER GANJIL'}
           </h3>
-          <h1 className="text-[16pt] font-black tracking-wider leading-tight text-stone-950 m-0 mt-0.5">
+          <h1 className="text-[16pt] font-bold tracking-wider leading-tight text-stone-950 m-0 mt-0.5">
             {resolvedSchoolName}
           </h1>
           <p className="text-[11pt] font-bold tracking-wide leading-tight text-stone-900 m-0 mt-0.5">
@@ -276,48 +276,48 @@ export const ReportCertificateFullDay: React.FC<ReportCertificateFullDayProps> =
           ========================================================= */}
       <table className={`w-full text-stone-950 border-collapse ${isCompact ? 'mb-1 text-[8.5pt]' : 'mb-2.5 text-[9.5pt]'}`}>
         <thead>
-          <tr className="bg-sky-100/70 text-center font-bold">
+          <tr className="bg-stone-100 text-center font-bold">
             <th
               rowSpan={2}
-              className={`border border-stone-900 px-1 ${isCompact ? 'py-0.5' : 'py-1'}`}
+              className={`border border-stone-400 px-1 ${isCompact ? 'py-0.5' : 'py-1'}`}
               style={{ width: '5.5%' }}
             >
               NO
             </th>
             <th
               rowSpan={2}
-              className={`border border-stone-900 px-2 ${isCompact ? 'py-0.5' : 'py-1'} text-left`}
+              className={`border border-stone-400 px-2 ${isCompact ? 'py-0.5' : 'py-1'} text-left`}
               style={{ width: '33%' }}
             >
               Komponen Mata Pelajaran
             </th>
             <th
               rowSpan={2}
-              className={`border border-stone-900 px-1 ${isCompact ? 'py-0.5' : 'py-1'}`}
+              className={`border border-stone-400 px-1 ${isCompact ? 'py-0.5' : 'py-1'}`}
               style={{ width: '8%' }}
             >
               KKM
             </th>
             <th
               colSpan={2}
-              className={`border border-stone-900 px-2 ${isCompact ? 'py-0' : 'py-0.5'} text-center`}
+              className={`border border-stone-400 px-2 ${isCompact ? 'py-0' : 'py-0.5'} text-center`}
               style={{ width: '45.5%' }}
             >
               Nilai
             </th>
             <th
               rowSpan={2}
-              className={`border border-stone-900 px-1 ${isCompact ? 'py-0.5' : 'py-1'}`}
+              className={`border border-stone-400 px-1 ${isCompact ? 'py-0.5' : 'py-1'}`}
               style={{ width: '8%' }}
             >
               Afektif
             </th>
           </tr>
-          <tr className="bg-sky-50 text-center font-bold">
-            <th className={`border border-stone-900 px-1 ${isCompact ? 'py-0' : 'py-0.5'}`} style={{ width: '12%' }}>
+          <tr className="bg-stone-50 text-center font-bold">
+            <th className={`border border-stone-400 px-1 ${isCompact ? 'py-0' : 'py-0.5'}`} style={{ width: '12%' }}>
               Angka
             </th>
-            <th className={`border border-stone-900 px-2 ${isCompact ? 'py-0' : 'py-0.5'} text-left`} style={{ width: '33.5%' }}>
+            <th className={`border border-stone-400 px-2 ${isCompact ? 'py-0' : 'py-0.5'} text-left`} style={{ width: '33.5%' }}>
               Huruf
             </th>
           </tr>
@@ -334,16 +334,16 @@ export const ReportCertificateFullDay: React.FC<ReportCertificateFullDayProps> =
 
             return (
               <tr key={sub.id} className="hover:bg-slate-50 transition">
-                <td className={`border border-stone-900 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-medium`}>
+                <td className={`border border-stone-400 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-medium`}>
                   {idx + 1}
                 </td>
-                <td className={`border border-stone-900 px-2 ${isCompact ? 'py-[1px]' : 'py-0.5'} text-stone-900 font-medium`}>
+                <td className={`border border-stone-400 px-2 ${isCompact ? 'py-[1px]' : 'py-0.5'} text-stone-900 font-medium`}>
                   {sub.nameId}
                 </td>
-                <td className={`border border-stone-900 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-medium`}>
+                <td className={`border border-stone-400 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-medium`}>
                   {kkmVal}
                 </td>
-                <td className={`border border-stone-900 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-bold`}>
+                <td className={`border border-stone-400 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-bold`}>
                   {isEditingMode && !isPrintOnly ? (
                     <input
                       type="number"
@@ -362,10 +362,10 @@ export const ReportCertificateFullDay: React.FC<ReportCertificateFullDayProps> =
                     '-'
                   )}
                 </td>
-                <td className={`border border-stone-900 px-2 ${isCompact ? 'py-[1px] text-[8pt]' : 'py-0.5 text-[9pt]'} italic capitalize`}>
+                <td className={`border border-stone-400 px-2 ${isCompact ? 'py-[1px] text-[8pt]' : 'py-0.5 text-[9pt]'} italic capitalize`}>
                   {terbilang}
                 </td>
-                <td className={`border border-stone-900 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-bold`}>
+                <td className={`border border-stone-400 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-bold`}>
                   {afektifVal}
                 </td>
               </tr>
@@ -376,28 +376,28 @@ export const ReportCertificateFullDay: React.FC<ReportCertificateFullDayProps> =
           <tr className="font-bold bg-slate-50">
             <td
               colSpan={3}
-              className={`border border-stone-900 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} uppercase tracking-wider`}
+              className={`border border-stone-400 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} uppercase tracking-wider`}
             >
               Jumlah
             </td>
-            <td className={`border border-stone-900 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-black ${isCompact ? 'text-[9pt]' : 'text-[10pt]'}`}>
+            <td className={`border border-stone-400 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-black ${isCompact ? 'text-[9pt]' : 'text-[10pt]'}`}>
               {totalScore}
             </td>
-            <td colSpan={2} className="border border-stone-900"></td>
+            <td colSpan={2} className="border border-stone-400"></td>
           </tr>
 
           {/* Baris Rata-rata */}
           <tr className="font-bold bg-slate-50">
             <td
               colSpan={3}
-              className={`border border-stone-900 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} uppercase tracking-wider`}
+              className={`border border-stone-400 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} uppercase tracking-wider`}
             >
               Rata-rata
             </td>
-            <td className={`border border-stone-900 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-black ${isCompact ? 'text-[9pt]' : 'text-[10pt]'}`}>
+            <td className={`border border-stone-400 text-center ${isCompact ? 'py-[1px]' : 'py-0.5'} font-black ${isCompact ? 'text-[9pt]' : 'text-[10pt]'}`}>
               {avgScore.toFixed(2).replace('.', ',')}
             </td>
-            <td colSpan={2} className="border border-stone-900"></td>
+            <td colSpan={2} className="border border-stone-400"></td>
           </tr>
         </tbody>
       </table>
@@ -413,35 +413,35 @@ export const ReportCertificateFullDay: React.FC<ReportCertificateFullDayProps> =
         <div className="w-full flex gap-3">
           {/* Tabel Kiri: Kepribadian & Ranking */}
           <div className="flex-1">
-            <table className="w-full border-collapse border border-stone-900 text-[9pt]">
+            <table className="w-full border-collapse border border-stone-400 text-[9pt]">
               <thead>
-                <tr className="bg-sky-50 text-center font-bold">
-                  <th className="border border-stone-900 py-0.5 w-1/2">Kepribadian</th>
-                  <th className="border border-stone-900 py-0.5 w-1/2">Ket</th>
+                <tr className="bg-stone-50 text-center font-bold">
+                  <th className="border border-stone-400 py-0.5 w-1/2">Kepribadian</th>
+                  <th className="border border-stone-400 py-0.5 w-1/2">Ket</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="border border-stone-900 px-2 py-0.5">Kerapihan</td>
-                  <td className="border border-stone-900 text-center py-0.5 font-bold">
+                  <td className="border border-stone-400 px-2 py-0.5">Kerapihan</td>
+                  <td className="border border-stone-400 text-center py-0.5 font-bold">
                     {student.kepribadian?.kerapihan || 'A'}
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-stone-900 px-2 py-0.5">Kedisiplinan</td>
-                  <td className="border border-stone-900 text-center py-0.5 font-bold">
+                  <td className="border border-stone-400 px-2 py-0.5">Kedisiplinan</td>
+                  <td className="border border-stone-400 text-center py-0.5 font-bold">
                     {student.kepribadian?.kedisiplinan || 'A'}
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-stone-900 px-2 py-0.5">Kejujuran</td>
-                  <td className="border border-stone-900 text-center py-0.5 font-bold">
+                  <td className="border border-stone-400 px-2 py-0.5">Kejujuran</td>
+                  <td className="border border-stone-400 text-center py-0.5 font-bold">
                     {student.kepribadian?.kejujuran || 'A'}
                   </td>
                 </tr>
                 <tr className="bg-slate-50 font-bold">
-                  <td className="border border-stone-900 px-2 py-1">Peringkat Kelas</td>
-                  <td className="border border-stone-900 text-center py-1">
+                  <td className="border border-stone-400 px-2 py-1">Peringkat Kelas</td>
+                  <td className="border border-stone-400 text-center py-1">
                     Ke <span className="text-[10pt] font-black text-blue-900">{student.rank}</span>{' '}
                     dari {totalStudentsInClass} siswa
                   </td>
@@ -452,29 +452,29 @@ export const ReportCertificateFullDay: React.FC<ReportCertificateFullDayProps> =
 
           {/* Tabel Kanan: Alasan Ketidakhadiran */}
           <div className="flex-1">
-            <table className="w-full border-collapse border border-stone-900 text-[9pt]">
+            <table className="w-full border-collapse border border-stone-400 text-[9pt]">
               <thead>
-                <tr className="bg-sky-50 text-center font-bold">
-                  <th className="border border-stone-900 py-0.5 w-1/2">Alasan Ketidakhadiran</th>
-                  <th className="border border-stone-900 py-0.5 w-1/2">Keterangan</th>
+                <tr className="bg-stone-50 text-center font-bold">
+                  <th className="border border-stone-400 py-0.5 w-1/2">Alasan Ketidakhadiran</th>
+                  <th className="border border-stone-400 py-0.5 w-1/2">Keterangan</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="border border-stone-900 px-2 py-0.5">Sakit</td>
-                  <td className="border border-stone-900 text-center py-0.5">
+                  <td className="border border-stone-400 px-2 py-0.5">Sakit</td>
+                  <td className="border border-stone-400 text-center py-0.5">
                     {student.absensi?.sakit ?? 0} hari
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-stone-900 px-2 py-0.5">Izin</td>
-                  <td className="border border-stone-900 text-center py-0.5">
+                  <td className="border border-stone-400 px-2 py-0.5">Izin</td>
+                  <td className="border border-stone-400 text-center py-0.5">
                     {student.absensi?.izin ?? 0} hari
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-stone-900 px-2 py-0.5">Tanpa Keterangan</td>
-                  <td className="border border-stone-900 text-center py-0.5">
+                  <td className="border border-stone-400 px-2 py-0.5">Tanpa Keterangan</td>
+                  <td className="border border-stone-400 text-center py-0.5">
                     {student.absensi?.alpa ?? 0} hari
                   </td>
                 </tr>

@@ -734,6 +734,10 @@ export const ReportTable: React.FC<ReportTableProps> = ({
           user-select: none;
         }
 
+        .report-custom-table th span {
+          white-space: nowrap;
+        }
+
         .report-custom-table .text-ar {
           font-family: ${arabicFontFamily};
           font-weight: ${arabicFontWeight};

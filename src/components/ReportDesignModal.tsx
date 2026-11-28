@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 
 interface ReportDesignModalProps {
+  embedded?: boolean;
   isOpen: boolean;
   onClose: () => void;
   currentConfig: ReportDesignConfig;
@@ -37,11 +38,12 @@ export const ReportDesignModal: React.FC<ReportDesignModalProps> = ({
   onClose,
   currentConfig,
   onSaveConfig,
+  embedded = false,
 }) => {
   const [activeTab, setActiveTab] = useState<'frame' | 'table' | 'fontSize' | 'fontStyle' | 'alignment' | 'presets'>('frame');
   const [formData, setFormData] = useState<ReportDesignConfig>(currentConfig);
   const [presets, setPresets] = useState<DesignPreset[]>([]);
-  const [selectedPresetId, setSelectedPresetId] = useState<string>('default-gold-green');
+  const [selectedPresetId, setSelectedPresetId] = useState<string>('formal-simple');
   const [newPresetName, setNewPresetName] = useState('');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
@@ -90,7 +92,7 @@ export const ReportDesignModal: React.FC<ReportDesignModalProps> = ({
     if (confirm(`Hapus preset "${name}"?`)) {
       const updated = deleteDesignPreset(id);
       setPresets(updated);
-      setSelectedPresetId('default-gold-green');
+      setSelectedPresetId('formal-simple');
       showNotice(`Preset "${name}" berhasil dihapus.`);
     }
   };
@@ -116,8 +118,8 @@ export const ReportDesignModal: React.FC<ReportDesignModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-sm p-4 overflow-y-auto">
-      <div className="bg-white rounded-2xl shadow-2xl border border-stone-200 w-full max-w-4xl max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+    <div className={embedded ? 'w-full' : 'fixed inset-0 z-50 flex items-center justify-center bg-stone-900/80 backdrop-blur-sm p-4 overflow-y-auto'}>
+      <div className={`bg-white rounded-2xl border border-stone-200 w-full flex flex-col overflow-hidden ${embedded ? '' : 'shadow-2xl max-w-4xl max-h-[92vh]'}`}>
         {/* Header Modal */}
         <div className="px-6 py-4 bg-stone-900 text-white flex items-center justify-between border-b border-stone-800">
           <div className="flex items-center gap-3">
@@ -126,10 +128,7 @@ export const ReportDesignModal: React.FC<ReportDesignModalProps> = ({
             </div>
             <div>
               <h3 className="font-bold text-base md:text-lg flex items-center gap-2">
-                <span>Kustomisasi Desain & Tata Letak Rapor</span>
-                <span className="text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">
-                  CRUD Customizer
-                </span>
+                <span>Desain rapor</span>
               </h3>
               <p className="text-xs text-stone-400">
                 Atur posisi bingkai, tabel, ukuran font, gaya huruf, dan perataan teks secara fleksibel
@@ -236,10 +235,11 @@ export const ReportDesignModal: React.FC<ReportDesignModalProps> = ({
         </div>
 
         {/* Tab Content Body */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className={`flex-1 p-6 space-y-6 ${embedded ? '' : 'overflow-y-auto'}`}>
           {/* ===================== TAB 1: BINGKAI (FRAME) ===================== */}
           {activeTab === 'frame' && (
             <div className="space-y-5">
+              <label className="block text-sm font-semibold text-stone-700">Gaya bingkai<select value={formData.frameDecoration || 'simple'} onChange={event=>handleChange('frameDecoration',event.target.value as 'simple'|'ornate')} className="mt-2 block w-full rounded-lg border border-stone-300 bg-white p-3 text-base"><option value="simple">Formal sederhana</option><option value="ornate">Ornamen Islami</option></select></label>
               <div className="bg-emerald-50/60 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-900 flex items-center justify-between">
                 <div>
                   <strong>Pengaturan Bingkai Sertifikat:</strong> Sesuaikan jarak tepi (*padding*), ketebalan garis, jenis bingkai ganda/tunggal, warna garis, dan aksen emas.
