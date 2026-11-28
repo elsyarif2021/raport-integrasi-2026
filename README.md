@@ -1,3 +1,16 @@
+# Versi aplikasi
+
+| Folder | Versi | Backend |
+| --- | --- | --- |
+| [`sites/`](sites/) | Versi terbaru Raport Pondok: sidebar, akun massal, PIN otomatis, admin dari data guru, dan Ubah PIN saya | ChatGPT Sites + Cloudflare D1 |
+| Root repositori | Versi Vercel yang sudah ada | Vercel Functions + Neon PostgreSQL |
+
+Situs aktif versi terbaru: [Raport Pondok](https://raport-pondok.abumumtaz.chatgpt.site/).
+
+Kode `sites/` disalin dari source versi Sites 8, commit `ea3669624539e435ea7ef9410b6a295e75678956`. Database siswa, nilai, akun, sesi, dan nilai secret produksi tidak disertakan. Folder ini memiliki dependensi dan konfigurasi sendiri; deployment Vercel dari root tetap menggunakan versi Vercel.
+
+---
+
 # Raport Integrasi 2026
 
 Aplikasi Raport Pondok Modern Al-Ghozali. Antarmuka React dan Vite mempertahankan dashboard, pengisian nilai, rekapitulasi, desain rapor, cetak, serta impor dan ekspor Excel. Vercel Functions memeriksa akun, sesi, kelas, dan mata pelajaran. Data santri disimpan di Neon PostgreSQL.
@@ -47,3 +60,4 @@ Untuk mengimpor arsip lama dari browser, masuk sebagai admin dan pilih **Data Ma
 - Skrip impor mengambil data awal dari ZIP asli. Nilai yang hanya ada di Google Sheets lama atau profil browser perlu dimigrasikan dari sumbernya secara terpisah.
 
 Secara lokal, jalankan `npm run dev` untuk Vercel Dev dan `npm run lint && npm run build` untuk memeriksa proyek. `npm run dev:ui` menjalankan frontend saja untuk pengerjaan tampilan.
+

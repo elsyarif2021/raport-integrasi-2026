@@ -3,3 +3,7 @@
 *.private.json
 **/*.private.json
 private/
+
+# The Sites application has its own hosting and build.
+sites/
+
