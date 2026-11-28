@@ -1,5 +1,5 @@
-import { verifyGoogleRpc } from './googleRpc';
-import { verifiedProxyRequest } from './proxyClient';
+import { verifyGoogleRpc } from './googleRpc.js';
+import { verifiedProxyRequest } from './proxyClient.js';
 export const GOOGLE_OWNER_EMAIL='lionxmumtaz@gmail.com';
 export const GOOGLE_COOKIE='__Host-raport_google_session';
 export const GOOGLE_SESSION_SECONDS=8*60*60;

@@ -1,4 +1,4 @@
-import { validProxyKey } from './proxyClient';
+import { validProxyKey } from './proxyClient.js';
 const hex=(value:Uint8Array)=>Array.from(value,byte=>byte.toString(16).padStart(2,'0')).join('');
 const unhex=(value:string)=>Uint8Array.from(value.match(/../g)??[],byte=>parseInt(byte,16));
 async function rpcKey(secret:string,usage:'sign'|'verify') {
